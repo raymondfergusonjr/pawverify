@@ -338,6 +338,12 @@ nav{
   transition:border-color 0.2s;
 }
 .gate-input:focus{border-color:var(--green)}
+.gate-input.invalid{border-color:rgba(220,38,38,0.5);margin-bottom:0.25rem}
+.gate-error{
+  font-size:0.82rem;color:var(--red);
+  margin-bottom:0.75rem;display:none;
+}
+.gate-error.show{display:block}
 .gate-privacy{
   font-size:0.75rem;color:var(--muted2);
   margin-top:0.75rem;line-height:1.6;
@@ -812,8 +818,9 @@ input,textarea,select{color-scheme:light}
         The Learn modules, Lab simulator, and Community are behind a simple email verification to protect the educational content from being used by the very scammers we're training you to spot.<br><br>
         Enter your email to get instant access. No spam — we'll only contact you when new scenarios or features launch.
       </div>
-      <input class="gate-input" type="email" id="gate-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')submitGate()">
-      <button class="btn btn-primary" onclick="submitGate()" style="width:100%;justify-content:center">
+      <input class="gate-input" type="email" id="gate-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')submitGate()" oninput="clearGateError()">
+      <div class="gate-error" id="gate-error"></div>
+      <button class="btn btn-primary" onclick="submitGate()" style="width:100%;justify-content:center" id="gate-btn">
         Unlock Access →
       </button>
       <div class="gate-privacy">
@@ -1149,12 +1156,41 @@ function showGated(id, label) {
 
 let pendingSection = 'learn';
 
-function submitGate() {
+function clearGateError() {
+  document.getElementById('gate-error').classList.remove('show');
+  document.getElementById('gate-email').classList.remove('invalid');
+}
+
+async function submitGate() {
   const email = document.getElementById('gate-email').value.trim();
-  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!email || !emailRe.test(email)) {
+    const errEl = document.getElementById('gate-error');
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.classList.add('show');
+    document.getElementById('gate-email').classList.add('invalid');
+    return;
+  }
   verifiedEmail = email;
-  // In production: POST email to Worker for storage
-  // fetch(WORKER_URL + '/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+
+  const btn = document.getElementById('gate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    await fetch(WORKER_URL + '/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+  } catch(e) {
+    // Non-blocking — let them through regardless
+    console.error('Register error:', e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Unlock Access →';
+  }
+
   show(pendingSection);
 }
 
