@@ -21,7 +21,7 @@ const CONFIG = {
   DAILY_GLOBAL_ANALYZE_CAP: 500,     // total analyzer calls per day site-wide
   DAILY_GLOBAL_SIM_CAP: 200,         // total simulator calls per day site-wide
   MAX_INPUT_LENGTH: 4000,            // max characters accepted from user
-  CLAUDE_MODEL: 'claude-sonnet-4-20250514',
+  CLAUDE_MODEL: 'claude-sonnet-4-6',
   MAX_TOKENS: 800,
   ALLOWED_ORIGINS: [
     'https://pawverify.org',
