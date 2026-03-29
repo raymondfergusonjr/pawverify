@@ -27,7 +27,8 @@ const CONFIG = {
     'https://pawverify.org',
     'https://www.pawverify.org',
     'https://staging.pawverify.org',
-    'http://localhost:3000',           // local dev only — remove in production
+    'https://pawverify.pages.dev',
+    'http://localhost:3000',
   ]
 };
 

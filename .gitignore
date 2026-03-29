@@ -1,0 +1,5 @@
+*.zip
+.wrangler/
+.claude/
+node_modules/
+nul
