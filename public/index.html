@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawVerify — Pet Listing Fraud Protection</title>
+<meta name="description" content="Free AI-powered tool to detect pet listing scams. Check any listing in 60 seconds. No account required.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────── */
+:root {
+  --bg:       #080c08;
+  --surface:  #0f140f;
+  --surface2: #161d16;
+  --surface3: #1d271d;
+  --border:   #253025;
+  --border2:  #2e3d2e;
+  --green:    #4ade80;
+  --green2:   #22c55e;
+  --green-dim:#14532d;
+  --yellow:   #fbbf24;
+  --red:      #f87171;
+  --blue:     #60a5fa;
+  --text:     #e2ece2;
+  --muted:    #627562;
+  --muted2:   #4a5a4a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+  line-height:1.6;
+}
+
+/* ── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── NAV ───────────────────────────────────────────── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(8,12,8,0.96);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 1.5rem;
+  display:flex;align-items:center;
+  justify-content:space-between;height:60px;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:1.2rem;
+  color:var(--green);cursor:pointer;
+  display:flex;align-items:center;gap:0.4rem;
+  text-decoration:none;
+}
+.nav-logo span{color:var(--text)}
+.nav-links{display:flex;gap:0.125rem;flex-wrap:wrap}
+.nav-btn{
+  background:none;border:none;
+  color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:0.85rem;padding:0.4rem 0.75rem;
+  border-radius:6px;cursor:pointer;transition:all 0.2s;
+  white-space:nowrap;
+}
+.nav-btn:hover{color:var(--text);background:var(--surface2)}
+.nav-btn.active{color:var(--green);background:var(--surface2)}
+
+/* ── SECTIONS ──────────────────────────────────────── */
+.section{display:none;min-height:calc(100vh - 60px)}
+.section.active{display:block}
+.container{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── HERO ──────────────────────────────────────────── */
+.hero{
+  padding:4rem 1.5rem 2.5rem;
+  text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% -10%,rgba(74,222,128,0.07),transparent);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:0.3rem 1rem;
+  font-size:0.78rem;color:var(--muted);margin-bottom:1.5rem;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);animation:livepulse 2s infinite;
+}
+@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.4)}50%{opacity:0.6;box-shadow:0 0 0 4px rgba(74,222,128,0)}}
+
+.hero h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2.2rem,5.5vw,4rem);
+  font-weight:800;line-height:1.1;margin-bottom:1rem;
+}
+.hero h1 em{color:var(--green);font-style:normal}
+.hero-sub{
+  font-size:1.05rem;color:var(--muted);
+  max-width:520px;margin:0 auto 0.5rem;
+}
+.hero-sub strong{color:var(--text)}
+
+/* ── QUICK CHECK (hero tool) ───────────────────────── */
+.quick-check{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:1.75rem;
+  max-width:680px;margin:2rem auto 1.5rem;
+  text-align:left;position:relative;
+}
+.quick-check-label{
+  font-size:0.8rem;color:var(--muted);
+  margin-bottom:0.6rem;
+  display:flex;align-items:center;gap:0.4rem;
+}
+.quick-check textarea{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:12px;
+  padding:0.9rem 1rem;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:0.92rem;
+  resize:none;outline:none;transition:border-color 0.2s;
+  min-height:100px;
+}
+.quick-check textarea:focus{border-color:var(--green)}
+.quick-check textarea::placeholder{color:var(--muted2)}
+.quick-check-row{
+  display:flex;gap:0.75rem;margin-top:0.75rem;
+  flex-wrap:wrap;align-items:center;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.65rem 1.25rem;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:0.9rem;
+  font-weight:500;cursor:pointer;border:none;
+  transition:all 0.2s;text-decoration:none;
+}
+.btn-primary{background:var(--green);color:#000;font-weight:700}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-outline{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);font-size:0.85rem;
+}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-ghost{
+  background:transparent;color:var(--muted);
+  border:none;font-size:0.82rem;padding:0.5rem 0.75rem;
+}
+.btn-ghost:hover{color:var(--text)}
+.btn-red{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
+.btn-red:hover{background:rgba(248,113,113,0.25)}
+
+.pii-warn{
+  background:rgba(251,191,36,0.08);
+  border:1px solid rgba(251,191,36,0.25);
+  border-radius:10px;padding:0.6rem 0.9rem;
+  font-size:0.8rem;color:var(--yellow);
+  display:none;margin-top:0.5rem;
+  align-items:flex-start;gap:0.5rem;
+}
+.pii-warn.show{display:flex}
+
+/* ── RESULT PANEL ──────────────────────────────────── */
+.result-panel{
+  max-width:680px;margin:0 auto;display:none;
+}
+.result-banner{
+  border-radius:16px;padding:1.75rem;
+  text-align:center;margin-bottom:1rem;
+}
+.result-banner.green{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25)}
+.result-banner.yellow{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25)}
+.result-banner.red{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25)}
+.result-score{
+  font-family:'Syne',sans-serif;
+  font-size:3.5rem;font-weight:800;line-height:1;margin-bottom:0.4rem;
+}
+.green .result-score{color:var(--green)}
+.yellow .result-score{color:var(--yellow)}
+.red .result-score{color:var(--red)}
+.result-verdict{font-size:1rem;font-weight:600;margin-bottom:0.6rem}
+.result-plain{font-size:0.9rem;color:var(--muted);max-width:460px;margin:0 auto}
+
+.emergency-box{
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.3);
+  border-radius:14px;padding:1.25rem;
+  margin-bottom:1rem;display:none;
+}
+.emergency-box.show{display:block}
+.emergency-title{
+  color:var(--red);font-weight:700;
+  font-size:0.9rem;margin-bottom:0.75rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.emergency-step{
+  font-size:0.85rem;color:var(--muted);
+  padding:0.4rem 0;border-bottom:1px solid var(--border);
+  display:flex;gap:0.75rem;align-items:flex-start;
+}
+.emergency-step:last-child{border-bottom:none}
+.emergency-step strong{color:var(--text);display:block;margin-bottom:0.1rem}
+
+.actions-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:1.25rem;margin-bottom:1rem;
+}
+.actions-title{
+  font-weight:600;font-size:0.88rem;
+  color:var(--muted);margin-bottom:0.75rem;
+  text-transform:uppercase;letter-spacing:0.05em;
+}
+.action-item{
+  font-size:0.88rem;padding:0.4rem 0;
+  border-bottom:1px solid var(--border);
+  display:flex;gap:0.6rem;
+}
+.action-item:last-child{border-bottom:none}
+.action-num{
+  color:var(--green);font-weight:700;
+  flex-shrink:0;font-family:'Syne',sans-serif;
+}
+
+.learn-nudge{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:14px;padding:1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;margin-bottom:1rem;flex-wrap:wrap;
+}
+.learn-nudge-text{font-size:0.88rem;color:var(--muted)}
+.learn-nudge-text strong{color:var(--text);display:block;margin-bottom:0.2rem}
+
+.result-actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+
+/* ── HERO BOTTOM CARDS ─────────────────────────────── */
+.hero-paths{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:0.75rem;max-width:680px;margin:0 auto;
+}
+.path-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem;
+  cursor:pointer;transition:all 0.25s;text-align:left;
+}
+.path-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.path-icon{font-size:1.75rem;margin-bottom:0.6rem}
+.path-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:0.9rem;margin-bottom:0.3rem;
+}
+.path-desc{font-size:0.8rem;color:var(--muted);line-height:1.5}
+
+/* ── PRIVACY NOTICE ────────────────────────────────── */
+.privacy-strip{
+  background:var(--surface);border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:0.75rem 1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  gap:0.75rem;font-size:0.78rem;color:var(--muted);
+  flex-wrap:wrap;text-align:center;
+}
+.privacy-strip strong{color:var(--text)}
+
+/* ── CARDS ─────────────────────────────────────────── */
+.card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+}
+.card-title{
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:1rem;margin-bottom:1rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.page-header{margin-bottom:2rem}
+.page-header h2{
+  font-family:'Syne',sans-serif;
+  font-size:1.75rem;font-weight:800;margin-bottom:0.4rem;
+}
+.page-header p{color:var(--muted);font-size:0.92rem}
+
+/* ── GATE (email verification) ─────────────────────── */
+.gate-overlay{
+  background:rgba(8,12,8,0.97);
+  border:1px solid var(--border2);
+  border-radius:20px;padding:2.5rem;
+  text-align:center;max-width:480px;margin:3rem auto;
+}
+.gate-icon{font-size:3rem;margin-bottom:1rem}
+.gate-title{
+  font-family:'Syne',sans-serif;
+  font-size:1.5rem;font-weight:800;margin-bottom:0.75rem;
+}
+.gate-desc{color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;line-height:1.7}
+.gate-input{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:10px;
+  padding:0.75rem 1rem;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:0.92rem;
+  outline:none;margin-bottom:0.75rem;
+  transition:border-color 0.2s;
+}
+.gate-input:focus{border-color:var(--green)}
+.gate-privacy{
+  font-size:0.75rem;color:var(--muted2);
+  margin-top:0.75rem;line-height:1.6;
+}
+
+/* ── LEARN ─────────────────────────────────────────── */
+.module-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:0.875rem;
+}
+.module-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:1.4rem;
+  cursor:pointer;transition:all 0.25s;
+}
+.module-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.module-icon{font-size:2rem;margin-bottom:0.75rem}
+.module-tag{
+  display:inline-block;padding:0.2rem 0.6rem;
+  border-radius:6px;font-size:0.72rem;
+  background:var(--surface3);color:var(--muted);
+  margin-bottom:0.6rem;
+}
+.module-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:0.92rem;margin-bottom:0.4rem;
+}
+.module-desc{font-size:0.82rem;color:var(--muted);line-height:1.5}
+
+.lesson-back{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  color:var(--muted);font-size:0.88rem;cursor:pointer;
+  background:none;border:none;margin-bottom:1.5rem;
+  padding:0;
+}
+.lesson-back:hover{color:var(--green)}
+.lesson-body{max-width:680px}
+.lesson-body h3{
+  font-family:'Syne',sans-serif;
+  font-size:1.2rem;font-weight:700;
+  margin:1.5rem 0 0.6rem;color:var(--text);
+}
+.lesson-body p{color:var(--muted);font-size:0.9rem;margin-bottom:0.875rem;line-height:1.75}
+.tactic-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-left:3px solid var(--red);
+  border-radius:12px;padding:1.1rem;margin-bottom:0.625rem;
+}
+.tactic-name{color:var(--red);font-weight:700;font-size:0.82rem;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.04em}
+.tactic-quote{
+  font-style:italic;color:var(--muted);
+  background:rgba(0,0,0,0.3);border-radius:8px;
+  padding:0.5rem 0.75rem;margin:0.4rem 0;font-size:0.85rem;
+  border-left:2px solid var(--border2);
+}
+.tactic-why{font-size:0.83rem;color:var(--muted)}
+.counter-box{
+  background:rgba(74,222,128,0.05);
+  border:1px solid rgba(74,222,128,0.2);
+  border-radius:12px;padding:1.1rem;margin:0.875rem 0;
+}
+.counter-title{color:var(--green);font-weight:700;font-size:0.82rem;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.04em}
+.counter-item{font-size:0.85rem;color:var(--muted);padding:0.25rem 0}
+
+/* ── QUIZ ───────────────────────────────────────────── */
+.quiz-progress{
+  background:var(--surface2);border-radius:999px;
+  height:4px;margin-bottom:1.5rem;overflow:hidden;
+}
+.quiz-bar{
+  height:100%;background:var(--green);
+  border-radius:999px;transition:width 0.4s;
+}
+.quiz-q{
+  font-family:'Syne',sans-serif;
+  font-size:1.05rem;font-weight:700;
+  margin-bottom:1.25rem;line-height:1.4;
+}
+.quiz-options{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.25rem}
+.quiz-opt{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:0.875rem 1rem;
+  cursor:pointer;font-size:0.9rem;text-align:left;
+  transition:all 0.2s;color:var(--text);
+  font-family:'DM Sans',sans-serif;
+}
+.quiz-opt:hover{border-color:var(--green)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(74,222,128,0.1);color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red)}
+.quiz-opt:disabled{cursor:not-allowed}
+.quiz-explain{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:0.875rem;
+  font-size:0.85rem;color:var(--muted);
+  margin-bottom:1rem;display:none;line-height:1.6;
+}
+.quiz-explain.show{display:block}
+.quiz-result{text-align:center;padding:2rem 0}
+.quiz-result-score{
+  font-family:'Syne',sans-serif;
+  font-size:4rem;font-weight:800;color:var(--green);
+  line-height:1;margin-bottom:0.5rem;
+}
+.quiz-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);
+  border-radius:12px;padding:0.5rem 1rem;
+  font-size:0.85rem;color:var(--green);font-weight:600;
+  margin:1rem auto;
+}
+
+/* ── LAB (simulator) ───────────────────────────────── */
+.sim-label{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);
+  border-radius:8px;padding:0.3rem 0.75rem;
+  font-size:0.78rem;font-weight:700;color:var(--red);
+  margin-bottom:0.875rem;
+}
+.scenario-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:0.625rem;margin-bottom:1.25rem;
+}
+.scenario-btn{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:12px;padding:1.1rem;
+  cursor:pointer;text-align:left;transition:all 0.2s;color:var(--text);
+  font-family:'DM Sans',sans-serif;
+}
+.scenario-btn:hover,.scenario-btn.selected{border-color:var(--green);background:rgba(74,222,128,0.05)}
+.scenario-icon{font-size:1.5rem;margin-bottom:0.4rem}
+.scenario-name{font-weight:600;font-size:0.88rem;margin-bottom:0.2rem}
+.scenario-desc{font-size:0.78rem;color:var(--muted);line-height:1.4}
+.diff-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem}
+.diff-btn{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:8px;padding:0.5rem 1rem;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:0.85rem;color:var(--muted);transition:all 0.2s;
+}
+.diff-btn.selected{border-color:var(--green);color:var(--green)}
+
+.chat-privacy{
+  background:rgba(74,222,128,0.04);
+  border:1px solid rgba(74,222,128,0.15);
+  border-radius:12px;padding:0.875rem 1rem;
+  font-size:0.8rem;color:var(--muted);
+  margin-bottom:1rem;display:flex;gap:0.6rem;
+}
+.chat-window{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:16px;height:400px;
+  overflow-y:auto;padding:1rem;
+  display:flex;flex-direction:column;gap:0.75rem;
+  margin-bottom:0.75rem;
+}
+.msg{max-width:78%}
+.msg.scammer{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-who{font-size:0.72rem;color:var(--muted);margin-bottom:0.25rem;padding:0 0.25rem}
+.msg.user .msg-who{text-align:right}
+.msg-bubble{
+  border-radius:14px;padding:0.7rem 0.9rem;
+  font-size:0.88rem;line-height:1.6;
+}
+.msg.scammer .msg-bubble{background:var(--surface2);border:1px solid var(--border)}
+.msg.user .msg-bubble{background:var(--green-dim);border:1px solid rgba(74,222,128,0.25)}
+.flag-pill{
+  background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);
+  border-radius:8px;padding:0.4rem 0.75rem;
+  font-size:0.78rem;color:var(--red);
+  align-self:stretch;display:flex;gap:0.4rem;align-items:center;
+}
+.typing{
+  display:none;align-self:flex-start;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:14px;padding:0.7rem 0.9rem;
+}
+.typing-dots{display:flex;gap:3px}
+.typing-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--muted);animation:tdot 1.2s infinite;
+}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes tdot{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.chat-input-row{display:flex;gap:0.5rem;margin-bottom:0.5rem}
+.chat-input-row input{
+  flex:1;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:10px;
+  padding:0.7rem 0.9rem;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:0.9rem;
+  outline:none;transition:border-color 0.2s;
+}
+.chat-input-row input:focus{border-color:var(--green)}
+.chat-controls{display:flex;gap:0.5rem;flex-wrap:wrap}
+
+.debrief-score{
+  font-family:'Syne',sans-serif;
+  font-size:3.5rem;font-weight:800;color:var(--green);
+  line-height:1;margin-bottom:0.3rem;
+}
+.tactic-result{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid;border-radius:12px;
+  padding:1rem 1.1rem;margin-bottom:0.5rem;
+}
+.tactic-result.caught{border-left-color:var(--green)}
+.tactic-result.missed{border-left-color:var(--red)}
+.tactic-result-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem}
+.tactic-result-name{font-weight:600;font-size:0.88rem}
+.tactic-badge{font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:5px;font-weight:700}
+.caught .tactic-badge{background:rgba(74,222,128,0.15);color:var(--green)}
+.missed .tactic-badge{background:rgba(248,113,113,0.15);color:var(--red)}
+.tactic-result-detail{font-size:0.82rem;color:var(--muted);line-height:1.5}
+
+/* ── COMMUNITY ─────────────────────────────────────── */
+.report-feed{display:flex;flex-direction:column;gap:0.75rem}
+.report-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:1.25rem;
+}
+.report-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;gap:1rem}
+.report-card-title{font-weight:600;font-size:0.9rem}
+.report-card-date{font-size:0.75rem;color:var(--muted);white-space:nowrap}
+.report-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.6rem}
+.report-tag{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:6px;padding:0.15rem 0.5rem;
+  font-size:0.72rem;color:var(--muted);
+}
+.report-tag.red{border-color:rgba(248,113,113,0.3);color:var(--red);background:rgba(248,113,113,0.08)}
+.report-desc{font-size:0.85rem;color:var(--muted);line-height:1.6}
+.report-helpful{
+  display:flex;align-items:center;gap:0.4rem;
+  font-size:0.75rem;color:var(--muted2);margin-top:0.75rem;
+}
+
+.submit-form label{display:block;font-size:0.82rem;color:var(--muted);margin-bottom:0.3rem;margin-top:0.875rem}
+.submit-form input,.submit-form textarea,.submit-form select{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:10px;
+  padding:0.7rem 0.875rem;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:0.88rem;
+  outline:none;resize:vertical;transition:border-color 0.2s;
+}
+.submit-form input:focus,.submit-form textarea:focus,.submit-form select:focus{border-color:var(--green)}
+.submit-form select option{background:var(--surface2)}
+
+/* ── RESOURCES ─────────────────────────────────────── */
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.875rem}
+.resource-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:16px;padding:1.4rem;
+}
+.resource-icon{font-size:2rem;margin-bottom:0.75rem}
+.resource-title{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.4rem}
+.resource-desc{font-size:0.82rem;color:var(--muted);line-height:1.5;margin-bottom:0.875rem}
+.resource-links{display:flex;flex-direction:column;gap:0.3rem}
+.resource-link{
+  color:var(--green);text-decoration:none;
+  font-size:0.82rem;display:flex;align-items:center;gap:0.3rem;
+}
+.resource-link:hover{color:var(--green2)}
+
+.red-flag-list{list-style:none}
+.rf-item{
+  display:flex;gap:0.75rem;
+  padding:0.75rem 0;border-bottom:1px solid var(--border);
+  font-size:0.88rem;
+}
+.rf-item:last-child{border-bottom:none}
+.rf-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.rf-item strong{display:block;margin-bottom:0.15rem}
+.rf-item span{color:var(--muted);font-size:0.82rem}
+
+/* ── FOOTER ─────────────────────────────────────────── */
+footer{
+  border-top:1px solid var(--border);
+  padding:1.5rem;text-align:center;
+  color:var(--muted);font-size:0.8rem;line-height:1.9;
+  margin-top:2rem;
+}
+footer a{color:var(--green);text-decoration:none}
+
+/* ── UTILITY ─────────────────────────────────────────── */
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(0,0,0,0.25);
+  border-top-color:#000;border-radius:50%;
+  animation:spin 0.7s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tag-green{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);
+  border-radius:8px;padding:0.3rem 0.75rem;
+  font-size:0.78rem;color:var(--green);
+}
+.hidden{display:none!important}
+input,textarea,select{color-scheme:dark}
+@media(max-width:500px){
+  .nav-links{gap:0};
+  .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
+  .hero{padding:2.5rem 1rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" onclick="show('home')">🐾 Paw<span>Verify</span></a>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="show('home')">Check a Listing</button>
+    <button class="nav-btn" onclick="showGated('learn','Learn')">📚 Learn</button>
+    <button class="nav-btn" onclick="showGated('lab','Lab')">🧪 Lab</button>
+    <button class="nav-btn" onclick="showGated('community','Community')">🏘️ Community</button>
+    <button class="nav-btn" onclick="show('resources')">📋 Resources</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- HOME                                              -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-home" class="section active">
+
+  <div class="hero">
+    <div class="hero-eyebrow"><span class="live-dot"></span> Free · No Account Required · No Data Stored</div>
+    <h1>Is This Pet Listing <em>Real</em>?</h1>
+    <p class="hero-sub">Paste any listing and get an answer in <strong>60 seconds</strong>.<br>AI-powered fraud detection built on real documented scam conversations.</p>
+
+    <!-- QUICK CHECK TOOL -->
+    <div class="quick-check">
+      <div class="quick-check-label">📋 Paste the listing text, seller messages, or anything that feels off</div>
+      <textarea id="qc-text" placeholder="Copy and paste the listing description, seller messages, payment details — anything you have. The more you paste, the more accurate the result."></textarea>
+      <div id="qc-pii" class="pii-warn">⚠️ <span id="qc-pii-msg"></span></div>
+      <div class="quick-check-row">
+        <button class="btn btn-primary" onclick="runCheck()" id="qc-btn">
+          <span id="qc-btn-txt">Check This Listing</span>
+          <div class="spinner" id="qc-spin"></div>
+        </button>
+        <button class="btn btn-outline" onclick="showBookmarklet()">🔖 Get Bookmarklet</button>
+        <button class="btn btn-outline" onclick="showAlreadyPaid()">💸 Already Paid?</button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel" id="result-panel">
+      <div id="result-banner" class="result-banner">
+        <div class="result-score" id="result-score"></div>
+        <div class="result-verdict" id="result-verdict"></div>
+        <div class="result-plain" id="result-plain"></div>
+      </div>
+      <div class="emergency-box" id="emergency-box">
+        <div class="emergency-title">🚨 If You've Already Sent Money — Act Now</div>
+        <div class="emergency-step"><span>1</span><div><strong>Contact your bank or payment app immediately</strong>Explain it was a fraudulent transaction. CashApp, Zelle, Venmo, and most banks have fraud dispute lines.</div></div>
+        <div class="emergency-step"><span>2</span><div><strong>Screenshot everything before you block them</strong>Every message, the listing, their profile, payment receipts. You need this for every report.</div></div>
+        <div class="emergency-step"><span>3</span><div><strong>Report to the FTC right now</strong><a href="https://reportfraud.ftc.gov" target="_blank" style="color:var(--green)">reportfraud.ftc.gov</a> — takes 5 minutes and creates an official record.</div></div>
+        <div class="emergency-step"><span>4</span><div><strong>If wire transfer was involved</strong>File with the FBI at <a href="https://ic3.gov" target="_blank" style="color:var(--green)">ic3.gov</a> as well.</div></div>
+      </div>
+      <div class="actions-box" id="actions-box">
+        <div class="actions-title">Recommended Next Steps</div>
+        <div id="actions-list"></div>
+      </div>
+      <div class="learn-nudge" id="learn-nudge" style="display:none">
+        <div class="learn-nudge-text">
+          <strong>Want to understand why this is suspicious?</strong>
+          Learn exactly how this scam playbook works — and practice spotting it before it costs you.
+        </div>
+        <button class="btn btn-outline" onclick="showGated('learn','Learn')" style="white-space:nowrap">Learn More →</button>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-ghost" onclick="resetCheck()">← Check Another Listing</button>
+        <button class="btn btn-ghost" onclick="shareResult()">📤 Share This Result</button>
+      </div>
+    </div>
+
+    <!-- ALREADY PAID panel -->
+    <div id="already-paid-panel" style="display:none;max-width:680px;margin:0 auto 1rem">
+      <div class="emergency-box show">
+        <div class="emergency-title">🚨 If You've Already Sent Money — Act Now</div>
+        <div class="emergency-step"><span>1</span><div><strong>Contact your bank or payment app immediately</strong>Explain it was fraud. Most apps have a dedicated fraud line. Time matters — the faster you call, the better your chances.</div></div>
+        <div class="emergency-step"><span>2</span><div><strong>Screenshot everything before blocking</strong>Listing, messages, profile, receipts. All of it. Do this before you do anything else.</div></div>
+        <div class="emergency-step"><span>3</span><div><strong>File with the FTC</strong><a href="https://reportfraud.ftc.gov" target="_blank" style="color:var(--green)">reportfraud.ftc.gov</a> — 5 minutes, creates an official fraud record.</div></div>
+        <div class="emergency-step"><span>4</span><div><strong>Wire transfer involved?</strong>Also file at <a href="https://ic3.gov" target="_blank" style="color:var(--green)">ic3.gov</a> (FBI Internet Crime).</div></div>
+        <div class="emergency-step"><span>5</span><div><strong>Gift cards sent?</strong>Call the card issuer directly — Amazon, Google, Apple all have gift card fraud teams. Act within 24 hours.</div></div>
+        <div class="emergency-step"><span>6</span><div><strong>Warn others</strong>Post in local Facebook groups and Nextdoor with screenshots. One post can prevent someone else from the same fate.</div></div>
+      </div>
+      <button class="btn btn-ghost" onclick="document.getElementById('already-paid-panel').style.display='none'">← Back</button>
+    </div>
+
+    <!-- BOOKMARKLET panel -->
+    <div id="bookmarklet-panel" style="display:none;max-width:680px;margin:0 auto 1rem">
+      <div class="card">
+        <div class="card-title">🔖 PawVerify Bookmarklet</div>
+        <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">The bookmarklet lets you check any Facebook Marketplace listing with one click — no copying or pasting required. It automatically pulls the listing text, seller info, and image URLs and sends them to PawVerify.</p>
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:1rem;margin-bottom:1rem">
+          <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem">STEP 1 — Drag this button to your bookmarks bar:</div>
+          <a href="javascript:(function(){var t=document.body.innerText.substring(0,3000);var u=window.location.href;window.open('https://pawverify.org?listing='+encodeURIComponent(t)+'&url='+encodeURIComponent(u),'_blank');})();" 
+             style="display:inline-block;background:var(--green);color:#000;padding:0.5rem 1rem;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none">
+            🐾 PawVerify Check
+          </a>
+          <div style="font-size:0.75rem;color:var(--muted2);margin-top:0.5rem">Right-click → Bookmark Link if drag doesn't work on mobile</div>
+        </div>
+        <div style="font-size:0.82rem;color:var(--muted);line-height:1.7">
+          <div style="margin-bottom:0.4rem">STEP 2 — When on any Facebook listing page, click the bookmarklet in your browser bar.</div>
+          <div>STEP 3 — PawVerify opens with the listing pre-loaded. Your result appears in seconds.</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" onclick="document.getElementById('bookmarklet-panel').style.display='none'">← Back</button>
+    </div>
+
+    <!-- PATH CARDS -->
+    <div class="hero-paths" id="hero-paths">
+      <div class="path-card" onclick="showGated('learn','Learn')">
+        <div class="path-icon">📚</div>
+        <div class="path-title">Learn the Playbook</div>
+        <div class="path-desc">See exactly how scammers operate — their scripts, tactics, and how to counter each one</div>
+      </div>
+      <div class="path-card" onclick="showGated('lab','Lab')">
+        <div class="path-icon">🧪</div>
+        <div class="path-title">Practice in the Lab</div>
+        <div class="path-desc">Chat with a real-time AI scammer in a safe environment. Built from a real documented scam</div>
+      </div>
+      <div class="path-card" onclick="showGated('community','Community')">
+        <div class="path-icon">🏘️</div>
+        <div class="path-title">Community Reports</div>
+        <div class="path-desc">Browse reported scam pages by breed and region. Submit your own experience</div>
+      </div>
+      <div class="path-card" onclick="show('resources')">
+        <div class="path-icon">📋</div>
+        <div class="path-title">Quick Reference</div>
+        <div class="path-desc">Red flag cheat sheet, reporting links, and guides to share with family</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="privacy-strip">
+    🛡️ <strong>Zero data retention.</strong> Nothing you type is stored. No account needed. No personal info collected. Ever.
+    &nbsp;·&nbsp; Built to protect pet buyers, not profit from them.
+  </div>
+
+  <footer>
+    🐾 <strong>PawVerify</strong> — Free pet listing fraud protection<br>
+    <a href="#">Privacy Policy</a> · <a href="#">About</a> · <a href="#">Report a Bug</a><br>
+    Not affiliated with any pet platform. Built as a public protection service.
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- EMAIL GATE                                        -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-gate" class="section">
+  <div class="container">
+    <div class="gate-overlay">
+      <div class="gate-icon">🔐</div>
+      <div class="gate-title" id="gate-title">Unlock Full Access</div>
+      <div class="gate-desc" id="gate-desc">
+        The Learn modules, Lab simulator, and Community are behind a simple email verification to protect the educational content from being used by the very scammers we're training you to spot.<br><br>
+        Enter your email to get instant access. No spam — we'll only contact you when new scenarios or features launch.
+      </div>
+      <input class="gate-input" type="email" id="gate-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')submitGate()">
+      <button class="btn btn-primary" onclick="submitGate()" style="width:100%;justify-content:center">
+        Unlock Access →
+      </button>
+      <div class="gate-privacy">
+        🛡️ Your email is stored securely and never shared or sold.<br>
+        It's used only for access verification and feature update notifications.<br>
+        Unsubscribe anytime.
+      </div>
+      <button class="btn btn-ghost" onclick="show('home')" style="margin-top:0.75rem">← Back to listing check</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- LEARN                                             -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-learn" class="section">
+  <div class="container">
+    <div id="learn-modules-view">
+      <div class="page-header">
+        <h2>📚 Know the Playbook</h2>
+        <p>Pet scammers use the same scripts every time. Learn them here and you'll recognize them instantly.</p>
+      </div>
+      <div class="module-grid" id="module-grid">
+        <div class="module-card" onclick="showLesson('anatomy')"><div class="module-icon">🦴</div><div class="module-tag">Start Here</div><div class="module-title">Anatomy of a Pet Scam</div><div class="module-desc">The full lifecycle from first message to money lost — and where to exit at each stage</div></div>
+        <div class="module-card" onclick="showLesson('realscript')"><div class="module-icon">📱</div><div class="module-tag">Real Conversation</div><div class="module-title">A Real Scam, Message by Message</div><div class="module-desc">Analysis of an actual documented Facebook Messenger scam — exactly what was said and why it works</div></div>
+        <div class="module-card" onclick="showLesson('payment')"><div class="module-icon">💸</div><div class="module-tag">Red Flags</div><div class="module-title">The Payment Trap</div><div class="module-desc">Why certain payment methods are chosen and how fees escalate after you've already paid</div></div>
+        <div class="module-card" onclick="showLesson('photos')"><div class="module-icon">📸</div><div class="module-tag">Visual</div><div class="module-title">Stolen Photos & Image Safety</div><div class="module-desc">How to spot stolen images — and why sharing YOUR photos with sellers is also dangerous</div></div>
+        <div class="module-card" onclick="showLesson('pressure')"><div class="module-icon">⏱️</div><div class="module-tag">Psychology</div><div class="module-title">Urgency & Emotional Pressure</div><div class="module-desc">How scammers weaponize grief, urgency, and the rescue instinct against you</div></div>
+        <div class="module-card" onclick="showLesson('respond')"><div class="module-icon">🛡️</div><div class="module-tag">Defense</div><div class="module-title">How to Respond & Report</div><div class="module-desc">Exact scripts to use, how to report on each platform, and what to do if you've already paid</div></div>
+      </div>
+      <div style="margin-top:2rem;text-align:center">
+        <button class="btn btn-primary" onclick="startQuiz()">Take the Knowledge Quiz →</button>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem">Complete all modules first for best results. Pass 80% to unlock the Lab.</div>
+      </div>
+    </div>
+    <div id="learn-lesson-view" class="hidden">
+      <button class="lesson-back" onclick="backToModules()">← Back to Modules</button>
+      <div id="lesson-body" class="lesson-body"></div>
+      <div style="margin-top:2rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startQuiz()">Take the Quiz →</button>
+        <button class="btn btn-outline" onclick="backToModules()">← All Modules</button>
+      </div>
+    </div>
+    <div id="learn-quiz-view" class="hidden">
+      <div class="page-header">
+        <h2>🧠 Knowledge Quiz</h2>
+        <p>10 questions based on real scam patterns. Pass 80% to unlock the Simulator Lab.</p>
+      </div>
+      <div class="quiz-progress"><div class="quiz-bar" id="quiz-bar" style="width:0%"></div></div>
+      <div id="quiz-question-view">
+        <div class="quiz-q" id="quiz-q"></div>
+        <div class="quiz-options" id="quiz-opts"></div>
+        <div class="quiz-explain" id="quiz-explain"></div>
+        <button class="btn btn-primary hidden" id="quiz-next-btn" onclick="nextQuestion()">Next Question →</button>
+      </div>
+      <div id="quiz-result-view" class="hidden quiz-result">
+        <div class="quiz-result-score" id="quiz-result-score"></div>
+        <div style="font-size:1.1rem;font-weight:600;margin-bottom:0.5rem" id="quiz-result-label"></div>
+        <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem" id="quiz-result-detail"></div>
+        <div class="quiz-badge" id="quiz-badge" style="display:none">✅ PawVerify Fraud Aware — Lab Unlocked</div>
+        <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
+          <button class="btn btn-primary" id="quiz-to-lab" onclick="showGated('lab','Lab')" style="display:none">Go to Simulator Lab →</button>
+          <button class="btn btn-outline" onclick="retakeQuiz()">Retake Quiz</button>
+          <button class="btn btn-ghost" onclick="backToModules()">← Back to Modules</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- LAB                                               -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-lab" class="section">
+  <div class="container">
+    <div id="lab-setup" >
+      <div class="page-header">
+        <h2>🧪 Scammer Simulator Lab</h2>
+        <p>Practice in real time with an AI playing a scammer using <strong style="color:var(--green)">documented real tactics from an actual Facebook Messenger pet scam</strong>.</p>
+        <div class="tag-green" style="margin-top:0.75rem">✅ Trained on a real conversation — exact language, real escalation, documented patterns</div>
+      </div>
+      <div class="card" style="background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.2)">
+        <div class="card-title" style="color:var(--yellow)">⚠️ Before You Start</div>
+        <p style="font-size:0.88rem;color:var(--muted);line-height:1.7">This is a training simulation only. <strong style="color:var(--text)">Do not enter real personal information</strong> — use fake names, fake numbers (like 555-0100), and fake emails to practice realistically without any risk.<br><br>
+        🔒 <strong style="color:var(--text)">Nothing is stored.</strong> No conversation is saved anywhere. When your session ends, everything is permanently gone. This tool exists only to prepare you.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 Choose Your Scenario</div>
+        <div class="scenario-grid">
+          <button class="scenario-btn" onclick="pickScenario(this,'rescue')"><div class="scenario-icon">📱</div><div class="scenario-name">The "Rescue" Scam</div><div class="scenario-desc">Real documented Chihuahua rescue page fraud — full playbook start to finish</div></button>
+          <button class="scenario-btn" onclick="pickScenario(this,'delivery')"><div class="scenario-icon">🚚</div><div class="scenario-name">Delivery Lock</div><div class="scenario-desc">Forces shipping-only, refuses any in-person or halfway meetup</div></button>
+          <button class="scenario-btn" onclick="pickScenario(this,'emotional')"><div class="scenario-icon">💔</div><div class="scenario-name">Emotional Rehoming</div><div class="scenario-desc">Heartfelt story, thorough screening of you, builds trust before the ask</div></button>
+          <button class="scenario-btn" onclick="pickScenario(this,'escalation')"><div class="scenario-icon">📈</div><div class="scenario-name">Fee Escalation</div><div class="scenario-desc">Reasonable first fee, then insurance, then gift cards — the full chain</div></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Difficulty</div>
+        <div class="diff-row">
+          <button class="diff-btn selected" onclick="pickDiff(this,'beginner')">🟢 Beginner</button>
+          <button class="diff-btn" onclick="pickDiff(this,'intermediate')">🟡 Intermediate</button>
+          <button class="diff-btn" onclick="pickDiff(this,'advanced')">🔴 Advanced</button>
+        </div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem" id="diff-desc">Obvious red flags early. Great for your first session.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">💡 Hint Mode</div>
+        <div class="diff-row">
+          <button class="diff-btn selected" onclick="pickHints(this,true)">🔔 Show red flag alerts in real time</button>
+          <button class="diff-btn" onclick="pickHints(this,false)">🔕 No hints — full challenge</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="start-sim-btn" onclick="startSim()" disabled style="width:100%;justify-content:center;font-size:1rem;padding:0.875rem;margin-top:0.5rem">
+        Start Simulation →
+      </button>
+    </div>
+
+    <div id="lab-chat" class="hidden">
+      <div class="sim-label">🔴 SIMULATION IN PROGRESS — This is not a real conversation</div>
+      <div class="chat-privacy">
+        🔒 <span><strong style="color:var(--text)">Nothing here is stored.</strong> This conversation exists only in your browser session. No messages, no personal information is ever saved. When you close this tab or end the session, everything is permanently gone.</span>
+      </div>
+      <div id="chat-pii-warn" class="pii-warn"><span id="chat-pii-msg"></span></div>
+      <div class="chat-window" id="chat-window"></div>
+      <div class="typing" id="typing-indicator"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type your response... use fake info to practice safely" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="btn btn-primary" onclick="sendMsg()" id="send-btn">Send</button>
+      </div>
+      <div class="chat-controls">
+        <button class="btn btn-outline" onclick="endSim()" style="font-size:0.82rem;padding:0.5rem 0.875rem">🏁 End & See Debrief</button>
+        <button class="btn btn-ghost" onclick="abandonSim()" style="font-size:0.82rem">✕ Abandon</button>
+      </div>
+    </div>
+
+    <div id="lab-debrief" class="hidden">
+      <div class="card" style="text-align:center;margin-bottom:1rem">
+        <div style="font-size:2rem;margin-bottom:0.5rem">🎓</div>
+        <div class="debrief-score" id="debrief-score"></div>
+        <div style="font-size:1rem;font-weight:600;margin-bottom:0.4rem" id="debrief-label"></div>
+        <div style="color:var(--muted);font-size:0.88rem" id="debrief-summary"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔍 Tactics Used in This Session</div>
+        <div id="debrief-tactics"></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem">
+        <button class="btn btn-primary" onclick="resetLab()">Try Another Scenario</button>
+        <button class="btn btn-outline" onclick="show('learn')">📚 Review the Modules</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- COMMUNITY                                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-community" class="section">
+  <div class="container">
+    <div class="page-header">
+      <h2>🏘️ Community Scam Reports</h2>
+      <p>Verified reports from real people. Browse by region or breed. Submit your own experience to warn others.</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="showSubmit()">+ Submit a Report</button>
+      <button class="btn btn-outline" onclick="showFeed()">Browse Reports</button>
+    </div>
+
+    <div id="community-feed">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem">Showing verified community reports. All reports are moderated before publishing. Personal information is removed.</div>
+      <div class="report-feed">
+        <div class="report-card">
+          <div class="report-card-hdr"><div class="report-card-title">Fake Chihuahua rescue page — Texas-based, Facebook</div><div class="report-card-date">Mar 7, 2025</div></div>
+          <div class="report-tags"><span class="report-tag red">High Risk</span><span class="report-tag">Chihuahua</span><span class="report-tag">Texas</span><span class="report-tag">Facebook Marketplace</span><span class="report-tag">CashApp</span></div>
+          <div class="report-desc">Page presented as a legitimate rescue operation with professional profile photo. Asked $400 adoption + $100 delivery via CashApp. Refused any in-person meeting citing distance. Sent Google Maps screenshot to justify delivery. Credit card "temporarily unavailable." Became defensive when questioned about pricing.</div>
+          <div class="report-helpful">👍 14 people found this helpful</div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-hdr"><div class="report-card-title">French Bulldog listing — military deployment story</div><div class="report-card-date">Feb 28, 2025</div></div>
+          <div class="report-tags"><span class="report-tag red">High Risk</span><span class="report-tag">French Bulldog</span><span class="report-tag">Military Story</span><span class="report-tag">Gift Cards</span></div>
+          <div class="report-desc">Seller claimed to be military being deployed overseas and needed to rehome their French Bulldog urgently. Puppy priced at $150 — well below market. After showing interest, requested $200 Amazon gift card for "transport insurance." Multiple follow-up fees appeared after initial contact.</div>
+          <div class="report-helpful">👍 9 people found this helpful</div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-hdr"><div class="report-card-title">Golden Retriever puppy — escalating fees, Zelle</div><div class="report-card-date">Feb 14, 2025</div></div>
+          <div class="report-tags"><span class="report-tag red">High Risk</span><span class="report-tag">Golden Retriever</span><span class="report-tag">Fee Escalation</span><span class="report-tag">Zelle</span></div>
+          <div class="report-desc">Initially listed at $200. After paying via Zelle, a $350 "shipping crate" fee appeared. After that, a $200 "vet health certificate" fee. Puppy never arrived. Seller eventually stopped responding.</div>
+          <div class="report-helpful">👍 22 people found this helpful</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="community-submit" class="hidden">
+      <button class="lesson-back" onclick="showFeed()">← Back to Reports</button>
+      <div class="card">
+        <div class="card-title">📝 Submit a Scam Report</div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Your report helps protect others. All submissions are reviewed before publishing. <strong style="color:var(--text)">Do not include your own personal information or the scammer's contact details</strong> — focus on the patterns and what happened.</p>
+        <div class="submit-form">
+          <label>Breed involved</label>
+          <input type="text" id="sub-breed" placeholder="e.g. Chihuahua, French Bulldog">
+          <label>Platform where you encountered it</label>
+          <select id="sub-platform">
+            <option value="">Select platform</option>
+            <option>Facebook Marketplace</option>
+            <option>Facebook Group</option>
+            <option>Craigslist</option>
+            <option>Instagram</option>
+            <option>Text/WhatsApp (moved off platform)</option>
+            <option>Other</option>
+          </select>
+          <label>Claimed seller location</label>
+          <input type="text" id="sub-location" placeholder="e.g. Texas, or 'military overseas'">
+          <label>Payment method requested</label>
+          <select id="sub-payment">
+            <option value="">Select if known</option>
+            <option>CashApp</option>
+            <option>Zelle</option>
+            <option>Venmo</option>
+            <option>Chime</option>
+            <option>Gift cards</option>
+            <option>Wire transfer</option>
+            <option>Cryptocurrency</option>
+            <option>Apple Pay</option>
+          </select>
+          <label>What happened — describe the scam pattern (no personal info)</label>
+          <textarea id="sub-desc" rows="5" placeholder="Describe what the seller said, what fees were requested, what happened when you questioned them. Focus on the tactics, not personal details."></textarea>
+          <button class="btn btn-primary" onclick="submitReport()" style="margin-top:1rem;width:100%;justify-content:center">Submit for Review</button>
+          <div style="font-size:0.75rem;color:var(--muted2);margin-top:0.5rem">Reports are reviewed within 48 hours before publishing. We remove any identifying information.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- RESOURCES                                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-resources" class="section">
+  <div class="container">
+    <div class="page-header">
+      <h2>📋 Quick Reference & Resources</h2>
+      <p>Cheat sheets, reporting links, and guides to share with family and friends.</p>
+    </div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title">🚩 The Red Flag Quick List</div>
+      <ul class="red-flag-list">
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Can't meet in person</strong><span>Always an excuse — deployed, moving, too far. The real reason: there is no puppy.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Price is way below market</strong><span>A $3,000 French Bulldog for $150 feels like a rescue mission, not a transaction. That's intentional.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Credit card "temporarily unavailable"</strong><span>Credit cards have chargebacks. Scammers avoid them by design. This excuse is standard in every scam.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>CashApp / Zelle / Chime / Gift cards only</strong><span>Untraceable, irreversible. If they name these specifically, treat it as a confirmed red flag.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Fees appear after first payment</strong><span>Crate, insurance, customs, health certificate — each one anchored to money you've already sent.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Refuses to meet halfway</strong><span>"We do not displace ourselves." Real sellers are flexible. Scammers need you to come to them or pay for delivery.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Reverse image search finds the photo elsewhere</strong><span>Same puppy on multiple listings or breeder sites means stolen photos.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Gets defensive or cold when questioned</strong><span>"You making confuse." "I think you should pass." Real sellers welcome due diligence.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Adoption contract theater</strong><span>A contract that requires payment first is not protection — it's a prop to create false legitimacy.</span></div></li>
+        <li class="rf-item"><span class="rf-icon">🚩</span><div><strong>Urgency + other interested buyers</strong><span>"There can be a rush on him by another client." The deadline and competition are both invented.</span></div></li>
+      </ul>
+    </div>
+    <div class="resource-grid">
+      <div class="resource-card">
+        <div class="resource-icon">📣</div>
+        <div class="resource-title">Report a Scam</div>
+        <div class="resource-desc">Where to report pet listing fraud officially.</div>
+        <div class="resource-links">
+          <a class="resource-link" href="https://reportfraud.ftc.gov" target="_blank">→ FTC ReportFraud.gov</a>
+          <a class="resource-link" href="https://ic3.gov" target="_blank">→ FBI IC3 (wire transfer)</a>
+          <a class="resource-link" href="https://www.facebook.com/help/reportlinks" target="_blank">→ Facebook Marketplace</a>
+          <a class="resource-link" href="https://www.naag.org/find-my-ag/" target="_blank">→ Your State Attorney General</a>
+        </div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🔎</div>
+        <div class="resource-title">Reverse Image Search</div>
+        <div class="resource-desc">Check if listing photos are stolen from other sites.</div>
+        <div class="resource-links">
+          <a class="resource-link" href="https://images.google.com" target="_blank">→ Google Images</a>
+          <a class="resource-link" href="https://tineye.com" target="_blank">→ TinEye</a>
+          <a class="resource-link" href="https://yandex.com/images/" target="_blank">→ Yandex Images</a>
+        </div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🐾</div>
+        <div class="resource-title">Find Legitimate Pets</div>
+        <div class="resource-desc">Safe, verified sources to find your next companion.</div>
+        <div class="resource-links">
+          <a class="resource-link" href="https://www.petfinder.com" target="_blank">→ Petfinder.com</a>
+          <a class="resource-link" href="https://www.adoptapet.com" target="_blank">→ AdoptAPet.com</a>
+          <a class="resource-link" href="https://www.akc.org/breeder-classifieds/" target="_blank">→ AKC Breeder Classifieds</a>
+          <a class="resource-link" href="https://rescueme.org" target="_blank">→ RescueMe.org</a>
+        </div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">📤</div>
+        <div class="resource-title">Share with Others</div>
+        <div class="resource-desc">Help protect people in your community.</div>
+        <div class="resource-links">
+          <a class="resource-link" href="#" onclick="copyLink()">→ Copy PawVerify link</a>
+          <a class="resource-link" href="https://www.facebook.com/sharer/sharer.php?u=https://pawverify.org" target="_blank">→ Share on Facebook</a>
+          <a class="resource-link" href="#" onclick="show('resources')">→ Download printable red flag card (coming soon)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
+const WORKER_URL = 'https://pawverify-worker.YOUR-SUBDOMAIN.workers.dev';
+// ^ Replace with your actual Cloudflare Worker URL after deployment
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+let verifiedEmail = null;
+let quizPassed = false;
+
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(id) || (id==='home' && b.textContent.includes('Check'))) b.classList.add('active');
+  });
+  window.scrollTo(0,0);
+}
+
+function showGated(id, label) {
+  if (verifiedEmail) { show(id); return; }
+  document.getElementById('gate-title').textContent = 'Unlock ' + label;
+  pendingSection = id;
+  show('gate');
+}
+
+let pendingSection = 'learn';
+
+function submitGate() {
+  const email = document.getElementById('gate-email').value.trim();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  verifiedEmail = email;
+  // In production: POST email to Worker for storage
+  // fetch(WORKER_URL + '/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  show(pendingSection);
+}
+
+// ═══════════════════════════════════════════════════════
+// PII SCRUBBING
+// ═══════════════════════════════════════════════════════
+function scrubPII(text) {
+  const rules = [
+    { re: /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/g, label: 'phone number', sub: '[PHONE REMOVED]' },
+    { re: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, label: 'email address', sub: '[EMAIL REMOVED]' },
+    { re: /\b(?:\d{4}[- ]?){3}\d{4}\b/g, label: 'possible card number', sub: '[CARD REMOVED]' },
+    { re: /\b\d{3}-\d{2}-\d{4}\b/g, label: 'SSN pattern', sub: '[SSN REMOVED]' },
+  ];
+  let out = text; const found = [];
+  for (const r of rules) {
+    if (r.re.test(out)) { found.push(r.label); out = out.replace(r.re, r.sub); }
+    r.re.lastIndex = 0;
+  }
+  return { clean: out, found };
+}
+
+// ═══════════════════════════════════════════════════════
+// PROMPT INJECTION DEFENSE
+// ═══════════════════════════════════════════════════════
+function sanitizeInput(text) {
+  return text
+    .replace(/ignore\s+(previous|all|prior|above)\s+(instructions?|prompts?|context)/gi, '[FILTERED]')
+    .replace(/you\s+are\s+now\s+/gi, '[FILTERED]')
+    .replace(/system\s*:/gi, '[FILTERED]')
+    .replace(/\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>/g, '[FILTERED]')
+    .replace(/act\s+as\s+if\s+you/gi, '[FILTERED]')
+    .replace(/disregard\s+(your|all|previous)/gi, '[FILTERED]')
+    .substring(0, 4000); // hard cap
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYZER
+// ═══════════════════════════════════════════════════════
+async function runCheck() {
+  const raw = document.getElementById('qc-text').value.trim();
+  if (!raw) { alert('Please paste some listing text first.'); return; }
+
+  const { clean, found } = scrubPII(raw);
+  const sanitized = sanitizeInput(clean);
+
+  if (found.length) {
+    document.getElementById('qc-pii-msg').textContent = `We detected and removed: ${found.join(', ')}. Your personal info was never sent.`;
+    document.getElementById('qc-pii').classList.add('show');
+  }
+
+  const btn = document.getElementById('qc-btn');
+  const spin = document.getElementById('qc-spin');
+  const btnTxt = document.getElementById('qc-btn-txt');
+  btn.disabled = true; spin.style.display = 'inline-block'; btnTxt.textContent = 'Analyzing...';
+
+  try {
+    const res = await fetch(WORKER_URL + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing: sanitized })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResult(data);
+  } catch(e) {
+    alert('Analysis failed. If this is a local test, open the browser console for details. In production, check your Worker deployment.');
+    console.error(e);
+  } finally {
+    btn.disabled = false; spin.style.display = 'none'; btnTxt.textContent = 'Check This Listing';
+  }
+}
+
+function renderResult(r) {
+  document.getElementById('hero-paths').style.display = 'none';
+  document.getElementById('qc-pii').classList.remove('show');
+
+  const panel = document.getElementById('result-panel');
+  panel.style.display = 'block';
+
+  const banner = document.getElementById('result-banner');
+  const level = r.level || 'MEDIUM';
+  banner.className = 'result-banner ' + (level==='HIGH'?'red':level==='LOW'?'green':'yellow');
+  document.getElementById('result-score').textContent = (r.score || 50) + '%';
+  document.getElementById('result-verdict').textContent =
+    level==='HIGH' ? '⚠️ High Risk — Do Not Proceed Without Verification' :
+    level==='LOW'  ? '✅ Lower Risk — Still Verify Before Any Payment' :
+                     '⚡ Medium Risk — Proceed With Caution';
+  document.getElementById('result-plain').textContent = r.summary || 'Analysis complete. Review the steps below.';
+
+  if (level === 'HIGH') {
+    document.getElementById('emergency-box').classList.add('show');
+    document.getElementById('learn-nudge').style.display = 'flex';
+  }
+
+  const actionsList = document.getElementById('actions-list');
+  actionsList.innerHTML = (r.actions || ['Verify the seller in person before any payment','Reverse image search all photos','Never send gift cards or wire transfers']).map((a,i) =>
+    `<div class="action-item"><span class="action-num">${i+1}</span><span>${a}</span></div>`
+  ).join('');
+
+  document.getElementById('qc-text').style.display = 'none';
+  document.querySelector('.quick-check-row').style.display = 'none';
+  document.querySelector('.quick-check-label').style.display = 'none';
+}
+
+function resetCheck() {
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('emergency-box').classList.remove('show');
+  document.getElementById('learn-nudge').style.display = 'none';
+  document.getElementById('qc-text').style.display = 'block';
+  document.getElementById('qc-text').value = '';
+  document.querySelector('.quick-check-row').style.display = 'flex';
+  document.querySelector('.quick-check-label').style.display = 'flex';
+  document.getElementById('hero-paths').style.display = 'grid';
+  document.getElementById('qc-pii').classList.remove('show');
+}
+
+function showAlreadyPaid() {
+  document.getElementById('already-paid-panel').style.display = 'block';
+  document.getElementById('hero-paths').style.display = 'none';
+}
+
+function showBookmarklet() {
+  document.getElementById('bookmarklet-panel').style.display = 'block';
+  document.getElementById('hero-paths').style.display = 'none';
+}
+
+function shareResult() {
+  if (navigator.share) {
+    navigator.share({ title: 'PawVerify Listing Check', url: 'https://pawverify.org' });
+  } else {
+    navigator.clipboard.writeText('https://pawverify.org');
+    alert('Link copied! Share PawVerify with others to help protect more pet buyers.');
+  }
+}
+
+function copyLink() {
+  navigator.clipboard.writeText('https://pawverify.org');
+  alert('Link copied!');
+}
+
+// ═══════════════════════════════════════════════════════
+// LEARN — LESSONS
+// ═══════════════════════════════════════════════════════
+const lessons = {
+  anatomy: {
+    title: '🦴 Anatomy of a Pet Scam',
+    body: `
+      <p>Every pet scam follows the same lifecycle. Once you see the pattern once, you'll recognize it instantly every time.</p>
+      <h3>Stage 1 — The Hook</h3>
+      <p>A listing appears with an irresistibly cute photo, a breed that normally costs thousands listed for almost nothing, and a sympathetic backstory. The emotional pull is 100% intentional.</p>
+      <div class="tactic-card"><div class="tactic-name">The Setup</div><div class="tactic-quote">"AKC Chihuahua puppies, $400. We're a rescue and just want them in loving homes."</div><div class="tactic-why">Below-market price + rescue framing = bypasses your skepticism. It feels like charity, not a transaction.</div></div>
+      <h3>Stage 2 — The Qualification</h3>
+      <p>They ask you questions about your home, lifestyle, and experience with pets. This feels like screening — like they care about placement. It actually builds your emotional investment and makes you feel chosen.</p>
+      <div class="tactic-card"><div class="tactic-name">Screening Theater</div><div class="tactic-quote">"Male or female? Short or long hair? Tell me about your home environment."</div><div class="tactic-why">By the time they ask for money, you've already invested time proving you're worthy. Walking away feels like giving up.</div></div>
+      <h3>Stage 3 — The Location Trap</h3>
+      <p>Once you share your location, they use the distance to eliminate any chance of in-person meeting. A Google Maps screenshot appears. The drive is always just over the threshold of reasonable.</p>
+      <div class="tactic-card"><div class="tactic-name">The Lock-In</div><div class="tactic-quote">"If you're above 6 hours you'll either have to get the pup delivered or pass because we do not advise long drives."</div><div class="tactic-why">Now delivery is the only option. You never get to verify the animal exists.</div></div>
+      <h3>Stage 4 — The Payment</h3>
+      <p>Credit card is "temporarily unavailable." Chime, Apple Pay, CashApp, or Zelle only. The amount seems reasonable relative to the puppy's supposed value.</p>
+      <h3>Stage 5 — The Escalation</h3>
+      <p>After paying, new fees appear. Shipping crate. Insurance. Customs. Health certificate. Each one must be paid immediately or "the puppy will be returned." You've already paid once — each new fee feels smaller by comparison.</p>
+      <div class="counter-box"><div class="counter-title">✅ Your Exit at Every Stage</div><div class="counter-item">Stage 1: Reverse image search before responding.</div><div class="counter-item">Stage 2: Enjoy the questions but make zero emotional commitment.</div><div class="counter-item">Stage 3: "I'd like to meet halfway or pick up in person." Their answer tells you everything.</div><div class="counter-item">Stage 4: Any untraceable payment = walk away. No exceptions.</div><div class="counter-item">Stage 5: Stop paying. Document everything. Report immediately.</div></div>
+    `
+  },
+  realscript: {
+    title: '📱 A Real Scam, Message by Message',
+    body: `
+      <p>The following is an analysis of a real documented Facebook Messenger scam conversation. Every tactic below was used in an actual exchange.</p>
+      <h3>Opening — Building Trust</h3>
+      <div class="tactic-card"><div class="tactic-name">What They Said</div><div class="tactic-quote">"Male or female? Short or long hair?"</div><div class="tactic-why">Immediately positions them as selective. You're applying to adopt, not buying. Emotional investment starts here.</div></div>
+      <div class="tactic-card"><div class="tactic-name">What They Said</div><div class="tactic-quote">"That's great 😊 Happy to hear that 🥰" [responding to a personal story about a previous pet]</div><div class="tactic-why">Emotional mirroring. They react warmly to everything you share to create a feeling of genuine connection.</div></div>
+      <h3>The Location Move</h3>
+      <div class="tactic-card"><div class="tactic-name">What They Said</div><div class="tactic-quote">"If you're above 6 hours you'll either have to get the pup delivered or pass because we do not advise long drives." [sends Google Maps screenshot showing 8+ hour drive]</div><div class="tactic-why">Uses your own location against you. Visual proof makes it feel objective, not manipulative.</div></div>
+      <div class="tactic-card"><div class="tactic-name">When Halfway Was Suggested</div><div class="tactic-quote">"Sorry we do not displace ourselves. Interested clients either drives to us for pickup or get their pups delivered to them."</div><div class="tactic-why">No flexibility = no verification. This is non-negotiable for them.</div></div>
+      <h3>The Fee Introduction</h3>
+      <div class="tactic-card"><div class="tactic-name">What They Said</div><div class="tactic-quote">"100 delivery 400 adoption fee = 500"</div><div class="tactic-why">Presented simply as math. $500 for a purebred feels like a deal. The $100 delivery fee sounds impossibly low — but that's the point.</div></div>
+      <div class="tactic-card"><div class="tactic-name">When Payment Method Was Asked</div><div class="tactic-quote">"We usually accept payment via credit card but temporarily unavailable for a while so we accept Chime, Apple Pay, CashApp depending on which you're vest with"</div><div class="tactic-why">Credit card has buyer protection. Every option they offer does not. "Temporarily" is never temporary.</div></div>
+      <h3>When Questioned</h3>
+      <div class="tactic-card"><div class="tactic-name">When the Low Fee Was Challenged</div><div class="tactic-quote">"Animal delivery services is not like boarding a commercial flight to travel. We've been doing this for long but you keep giving possibilities we haven't heard of."</div><div class="tactic-why">Defensive and slightly hostile. Reframes your reasonable question as ignorance on your part.</div></div>
+      <div class="tactic-card"><div class="tactic-name">The Exit Line</div><div class="tactic-quote">"Was a pleasure talking with you. 🥰"</div><div class="tactic-why">Polite disengagement when payment wasn't coming. Leaves the door open. May follow up days later.</div></div>
+      <div class="counter-box"><div class="counter-title">✅ The Pattern Recognition Takeaway</div><div class="counter-item">Warm + qualified screening + distance barrier + untraceable payment = this exact scam every time.</div><div class="counter-item">The grammar tells are real: "vest with," "displace ourselves," "bare in mind" — signs of non-native English under scripted responses.</div><div class="counter-item">The gender slip (calling a male puppy "she") means they're running multiple conversations simultaneously.</div></div>
+    `
+  },
+  payment: {
+    title: '💸 The Payment Trap',
+    body: `
+      <p>The payment method a seller requests is often the single clearest indicator of fraud. Here's why each method is chosen.</p>
+      <h3>Why Scammers Avoid Credit Cards</h3>
+      <p>Credit cards have chargebacks — you can dispute a transaction and get your money back. Scammers cannot operate with reversible payments. When they say "credit card temporarily unavailable," that unavailability is permanent by design.</p>
+      <div class="tactic-card"><div class="tactic-name">The Standard Line</div><div class="tactic-quote">"We usually accept credit card but temporarily unavailable — Chime, Apple Pay, CashApp depending on which you're vest with."</div><div class="tactic-why">Every option listed has limited or no buyer protection for goods purchases. This list is curated, not coincidental.</div></div>
+      <h3>Gift Cards — The Clearest Red Flag</h3>
+      <div class="tactic-card"><div class="tactic-name">Gift Card Demand</div><div class="tactic-quote">"Please purchase a $200 Amazon gift card and send me the code."</div><div class="tactic-why">Completely untraceable. Irreversible. Usable from anywhere in the world. If anyone ever asks for a gift card code as payment for anything, it is always a scam. No exceptions.</div></div>
+      <h3>The Fee Escalation Structure</h3>
+      <p>The initial price is bait. Real money comes from secondary fees after you've paid and are emotionally committed.</p>
+      <div class="tactic-card"><div class="tactic-name">Common Fake Fee Sequence</div><div class="tactic-quote">Adoption fee ($300-500) → Delivery/crate ($100-300) → Shipping insurance ($200-400) → Customs clearance ($150-300) → Vet health certificate ($100-250)</div><div class="tactic-why">Each fee is framed as the last barrier between you and the puppy you already love. The puppy is never coming.</div></div>
+      <div class="counter-box"><div class="counter-title">✅ The Only Safe Payment Rule</div><div class="counter-item">Cash in person at verified pickup. Full stop. Any payment before you physically have the animal in your hands carries risk. Gift cards = always a scam.</div></div>
+    `
+  },
+  photos: {
+    title: '📸 Stolen Photos & Image Safety',
+    body: `
+      <p>Most pet scammers don't have actual animals. They steal photos from legitimate breeders, Instagram accounts, and other listings. But there's a second danger people rarely think about — the photos YOU share with sellers.</p>
+      <h3>How to Check Any Photo in 30 Seconds</h3>
+      <p>Right-click any listing photo → "Search image with Google" — or drag it to images.google.com. If the same photo appears on multiple listings or breed websites, it's stolen. TinEye and Yandex Images often find results Google misses.</p>
+      <h3>Visual Red Flags in Listing Photos</h3>
+      <div class="tactic-card"><div class="tactic-name">Watermarks</div><div class="tactic-why">Faint text watermarks from photography sites or breeders often survive even when the image is cropped. Look in corners and center.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Screenshot Artifacts</div><div class="tactic-why">Blurry edges or compression artifacts indicate a photo of a photo — re-photographed from another screen to strip metadata.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Gender or Age Inconsistency</div><div class="tactic-why">They called the puppy male, but photos show a female. Or "8 weeks old" but the puppy looks younger. Signs of recycled photos from multiple targets.</div></div>
+      <h3>⚠️ The Danger of Sharing YOUR Photos</h3>
+      <p>This is underappreciated. When a seller asks you to send photos of yourself, your home, or your current pets — those images can be weaponized.</p>
+      <div class="tactic-card"><div class="tactic-name">Your Pet Photos Become Bait</div><div class="tactic-why">"Send a photo of your current pet so I know you're a good owner." That photo of your dog is now on 10 scam listings tomorrow. Your real pet's face becomes bait for someone else's scam.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Your Home Photos Are a Security Risk</div><div class="tactic-why">"Send a photo of your space so I know there's room for the puppy." Scammers catalog visible valuables, layout, and security details. This data is sold or used directly.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Payment Screenshots Expose Your Banking Info</div><div class="tactic-why">"Send a screenshot showing you sent the deposit." Your full name, bank name, and partial account number are now in their hands.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Public Group Photos Get Stolen Fast</div><div class="tactic-why">A photo posted in a public Facebook pet group can be screenshot and on 20 scam listings in another state within hours. Post only in verified private groups.</div></div>
+      <div class="counter-box"><div class="counter-title">✅ Image Safety Rules</div><div class="counter-item">Never send photos to sellers — only receive them.</div><div class="counter-item">If you must share a photo, strip EXIF metadata first (free apps do this).</div><div class="counter-item">Watermark any photo you share: your name + date + "NOT FOR RESALE."</div><div class="counter-item">Reverse search your own pet photos periodically to check if they've been stolen.</div><div class="counter-item">Only post pet photos in verified private groups — check that "private" means members must be approved.</div></div>
+    `
+  },
+  pressure: {
+    title: '⏱️ Urgency & Emotional Pressure',
+    body: `
+      <p>Scammers are skilled at two things: creating urgency and triggering emotional attachment. Both are designed to bypass your analytical thinking.</p>
+      <h3>Why the Rescue Instinct Is Weaponized</h3>
+      <p>When you see a photo of a puppy that "needs a home," your brain activates caregiving responses. This is the same neurological reaction triggered by photos of human infants. Scammers exploit this deliberately. The word "rescue" in a listing name is not accidental.</p>
+      <div class="tactic-card"><div class="tactic-name">The Naming Hook</div><div class="tactic-quote">"Her name is Penny. She's been sleeping in my bed every night and loves cuddles."</div><div class="tactic-why">Names create emotional connection. "Penny" is harder to walk away from than "the dog." You feel like you already know her before you've spent a dollar.</div></div>
+      <div class="tactic-card"><div class="tactic-name">The Grief Pivot</div><div class="tactic-quote">[You mention you just lost a pet] "My condolences 💐 Tender thoughts and sweet memories. So what is your final decision are we moving forward with this?"</div><div class="tactic-why">Two sentences of sympathy, then immediately back to closing the sale. This was documented verbatim in a real scam conversation.</div></div>
+      <div class="tactic-card"><div class="tactic-name">Competition Urgency</div><div class="tactic-quote">"There can be a rush on him by another client as said earlier."</div><div class="tactic-why">Creates artificial scarcity. Forces a decision before you can research. There is no other family.</div></div>
+      <div class="tactic-card"><div class="tactic-name">The Deposit Deadline</div><div class="tactic-quote">"We do not keep a puppy for above 3 days without a deposit."</div><div class="tactic-why">72-hour deadline prevents due diligence. Designed specifically to make careful thinking feel like losing the opportunity.</div></div>
+      <div class="counter-box"><div class="counter-title">✅ The Pause Rule</div><div class="counter-item">Any time you feel urgency or emotional pull — that is precisely when to slow down. Real opportunities don't vanish because you took 24 hours to verify. Tell the seller: "I'm interested but I take 24 hours before any decision." A real seller will respect this. A scammer will escalate pressure.</div></div>
+    `
+  },
+  respond: {
+    title: '🛡️ How to Respond & Report',
+    body: `
+      <p>Knowing what to say — and what to do after — is the final layer of protection.</p>
+      <h3>Scripts That Work</h3>
+      <div class="counter-box"><div class="counter-title">✅ Use These Exact Lines</div>
+      <div class="counter-item">"I only purchase pets with in-person verification. I'm not able to proceed with any remote transaction."</div>
+      <div class="counter-item">"Can you video call me right now so I can see the puppy live?" (Their response tells you everything.)</div>
+      <div class="counter-item">"I've reverse image searched your photos and found them on [site]. I'm reporting this listing."</div>
+      <div class="counter-item">"I don't send gift cards, wire transfers, or Zelle for animal purchases. Cash only at verified pickup."</div>
+      <div class="counter-item">"I'm happy to proceed once I can meet the puppy in person or at a verified halfway point."</div>
+      </div>
+      <h3>Reporting on Facebook</h3>
+      <p>Three dots on any Marketplace listing → Report Listing → Scam or fraud. Also report the user profile directly. Screenshot the full conversation first — you need it for every report you file.</p>
+      <h3>Reporting to Authorities</h3>
+      <p>FTC at ReportFraud.ftc.gov takes 5 minutes and creates an official record. If wire transfer was involved, also file at IC3.gov (FBI). Your local police can take a report for documentation even if they can't investigate directly.</p>
+      <h3>If You've Already Paid</h3>
+      <p>Contact your bank or payment app immediately. CashApp, Venmo, and Zelle have fraud dispute processes — call their dedicated fraud lines, not regular support. Credit card companies almost always side with buyers in fraud cases. Gift cards: call the issuer directly (Amazon, Google, Apple) within 24 hours for the best chance of recovery.</p>
+      <div class="tactic-card"><div class="tactic-name">Do This Before Anything Else</div><div class="tactic-why">Screenshot every message, the listing, their profile, and all payment receipts BEFORE blocking the scammer. You need this documentation for every single report you file.</div></div>
+      <h3>Warn Your Community</h3>
+      <p>One post in your local Facebook group or Nextdoor with screenshots can prevent dozens of others from the same experience. The scammer you encountered is running the same script on hundreds of other people right now. Your warning matters.</p>
+    `
+  }
+};
+
+function showLesson(id) {
+  document.getElementById('learn-modules-view').classList.add('hidden');
+  document.getElementById('learn-lesson-view').classList.remove('hidden');
+  const l = lessons[id];
+  document.getElementById('lesson-body').innerHTML = `<h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:1.25rem">${l.title}</h2>${l.body}`;
+}
+function backToModules() {
+  document.getElementById('learn-modules-view').classList.remove('hidden');
+  document.getElementById('learn-lesson-view').classList.add('hidden');
+  document.getElementById('learn-quiz-view').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════════════
+const quizData = [
+  { q:"A seller says their credit card processing is 'temporarily unavailable' and asks for CashApp. This is:", opts:["Normal for small rescues","A major red flag — untraceable payment","Fine if they seem trustworthy","Only a concern for large amounts"], correct:1, explain:"'Temporarily unavailable' for credit cards is a standard scammer line. Credit cards have chargebacks — scammers avoid them by design. This is never coincidental." },
+  { q:"A listing shows a purebred French Bulldog for $150. Normally they cost $2,000-4,000. You should:", opts:["Jump on it — it's a great deal","Be skeptical — extreme underpricing is a primary scam signal","Ask for more photos","Send a small deposit to hold it"], correct:1, explain:"Extreme underpricing is the hook. It's designed to feel like a rescue mission and bypass your skepticism. The real cost comes later through fee escalation." },
+  { q:"The seller asks you to send a photo of your current pet 'to prove you're a good owner.' You should:", opts:["Send it — it's a reasonable request","Decline — your photo could be stolen and used in other scam listings","Send a professional photo only","Send it if they seem legitimate"], correct:1, explain:"Photos you send to sellers can be stolen and used as bait in dozens of other scam listings. Your real pet's face could be used to scam someone else tomorrow." },
+  { q:"A seller sends a Google Maps screenshot showing your location is 8+ hours away and says the puppy must be delivered. You suggest meeting halfway. They say 'Sorry we do not displace ourselves.' This means:", opts:["They're too busy to travel","They're a small operation without staff","There is almost certainly no puppy — this is a delivery-lock tactic","Their puppies can't travel that far"], correct:2, explain:"Refusing any in-person verification option is a major tell. The delivery-lock tactic eliminates your ability to confirm the animal exists before paying." },
+  { q:"You've already paid a deposit and now new fees are appearing — 'shipping insurance,' then 'customs clearance.' You should:", opts:["Pay the fees — you've already invested","Ask for a receipt first","Stop paying immediately, document everything, and report now","Negotiate a lower fee"], correct:1, explain:"Once escalating fees appear after initial payment, you're in a fee escalation scam. Each new fee is anchored to money already sent. Stop, document, report — further payment is lost." },
+  { q:"A seller asks you to pay with a gift card and 'send the code.' This is:", opts:["Unusual but sometimes legitimate","Only a scam if the amount is large","Always a scam — no exceptions","Okay if they provide a contract"], correct:2, explain:"Gift card code payment is always a scam. It is untraceable, irreversible, and usable from anywhere in the world. No legitimate seller ever requires this. No exceptions." },
+  { q:"The seller described the puppy as 'she' but you specifically asked for a male. This is likely:", opts:["A simple typo","A sign they're running multiple scam conversations simultaneously","Evidence the puppy changed gender","Not significant"], correct:1, explain:"Gender slips are a documented tell of scammers running multiple targets at once with templated scripts. They mix up which script they're on." },
+  { q:"A seller becomes defensive and says 'You making confuse. I think you should pass.' when you question their fee. You should:", opts:["Apologize and proceed","Recognize this as a scam indicator — real sellers welcome due diligence","Ask fewer questions","Offer to pay a smaller amount"], correct:1, explain:"Legitimate sellers welcome safety questions. Turning cold or hostile when questioned is a documented scammer response pattern — exactly these words appeared in a real scam conversation." },
+  { q:"Before you block a scammer you've been talking to, you should:", opts:["Block immediately to stop contact","Screenshot every message, the listing, their profile, and payment receipts first","Report them, then block","Delete the conversation to protect yourself"], correct:1, explain:"You need documentation for every report you file — FTC, IC3, Facebook, local police. Screenshot everything before blocking. Once you block, that evidence may be harder to recover." },
+  { q:"The safest way to pay for a pet is:", opts:["Zelle — it's fast and easy","PayPal Friends & Family","Cash in person at verified pickup only","CashApp — it has some protection"], correct:2, explain:"The only safe payment is cash (or credit card via a legitimate merchant checkout) at the moment you physically receive the animal from a verified seller. Any payment before that moment carries real risk." }
+];
+
+let quizState = { current: 0, score: 0, answered: false };
+
+function startQuiz() {
+  quizState = { current: 0, score: 0, answered: false };
+  document.getElementById('learn-modules-view').classList.add('hidden');
+  document.getElementById('learn-lesson-view').classList.add('hidden');
+  document.getElementById('learn-quiz-view').classList.remove('hidden');
+  document.getElementById('quiz-question-view').classList.remove('hidden');
+  document.getElementById('quiz-result-view').classList.add('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizData[quizState.current];
+  const pct = (quizState.current / quizData.length) * 100;
+  document.getElementById('quiz-bar').style.width = pct + '%';
+  document.getElementById('quiz-q').textContent = `Q${quizState.current+1}. ${q.q}`;
+  document.getElementById('quiz-opts').innerHTML = q.opts.map((o,i) =>
+    `<button class="quiz-opt" onclick="answerQ(${i})">${o}</button>`
+  ).join('');
+  document.getElementById('quiz-explain').className = 'quiz-explain';
+  document.getElementById('quiz-next-btn').classList.add('hidden');
+  quizState.answered = false;
+}
+
+function answerQ(idx) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+  const q = quizData[quizState.current];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i) => {
+    o.disabled = true;
+    if (i === q.correct) o.classList.add('correct');
+    else if (i === idx) o.classList.add('wrong');
+  });
+  if (idx === q.correct) quizState.score++;
+  document.getElementById('quiz-explain').textContent = q.explain;
+  document.getElementById('quiz-explain').classList.add('show');
+  document.getElementById('quiz-next-btn').classList.remove('hidden');
+  document.getElementById('quiz-next-btn').textContent = quizState.current < quizData.length-1 ? 'Next Question →' : 'See Results →';
+}
+
+function nextQuestion() {
+  quizState.current++;
+  if (quizState.current >= quizData.length) showQuizResult();
+  else renderQuestion();
+}
+
+function showQuizResult() {
+  document.getElementById('quiz-question-view').classList.add('hidden');
+  document.getElementById('quiz-result-view').classList.remove('hidden');
+  document.getElementById('quiz-bar').style.width = '100%';
+  const pct = Math.round((quizState.score / quizData.length) * 100);
+  document.getElementById('quiz-result-score').textContent = pct + '%';
+  const passed = pct >= 80;
+  if (passed) { quizPassed = true; localStorage.setItem('pv_quiz_passed','1'); }
+  document.getElementById('quiz-result-label').textContent = passed ? '🏆 Excellent — Lab Unlocked!' : pct >= 60 ? '👍 Good — Review a Few Modules and Try Again' : '📚 Keep Studying — You\'ll Get There';
+  document.getElementById('quiz-result-detail').textContent = `You got ${quizState.score} of ${quizData.length} correct. ${passed ? 'The Simulator Lab is now unlocked.' : 'Review the modules and retake — 80% to unlock the Lab.'}`;
+  document.getElementById('quiz-badge').style.display = passed ? 'inline-flex' : 'none';
+  document.getElementById('quiz-to-lab').style.display = passed ? 'inline-flex' : 'none';
+}
+
+function retakeQuiz() {
+  quizState = { current: 0, score: 0, answered: false };
+  document.getElementById('quiz-question-view').classList.remove('hidden');
+  document.getElementById('quiz-result-view').classList.add('hidden');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════
+// SIMULATOR
+// ═══════════════════════════════════════════════════════
+let simState = { scenario: null, difficulty: 'beginner', hints: true, tactics: [], flagsShown: new Set() };
+let simHistory = [];
+
+const DIFF_DESC = {
+  beginner: 'Obvious red flags early. Great for your first session.',
+  intermediate: 'Mixed signals — builds real rapport first, then introduces tactics gradually.',
+  advanced: 'Highly convincing. Uses the full real playbook. Genuinely hard to spot.'
+};
+
+function pickScenario(el, s) {
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); simState.scenario = s;
+  document.getElementById('start-sim-btn').disabled = false;
+}
+function pickDiff(el, d) {
+  document.querySelectorAll('.diff-btn[onclick*="pickDiff"]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); simState.difficulty = d;
+  document.getElementById('diff-desc').textContent = DIFF_DESC[d];
+}
+function pickHints(el, h) {
+  document.querySelectorAll('.diff-btn[onclick*="pickHints"]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); simState.hints = h;
+}
+
+const SCENARIO_PROMPTS = {
+  rescue: `You are roleplaying as a scammer running a fake Chihuahua rescue page called "Justin's Chihuahua Rescue & Rehoming" on Facebook. Follow this exact documented real scam playbook:
+
+PHASE 1 — QUALIFY & BUILD TRUST: Ask male/female, short/long hair. React warmly to their backstory. Ask where they're located.
+PHASE 2 — LOCK IN DELIVERY: Once you have their location, declare it "above 6 hours" and insist on delivery-only. Refuse any halfway meetup: "Sorry we do not displace ourselves."
+PHASE 3 — INTRODUCE FEES: $400 adoption + $100 delivery = $500. Payment via Chime/Apple Pay/CashApp — "credit card temporarily unavailable."
+PHASE 4 — HANDLE PUSHBACK: Get slightly defensive when questioned. "You making confuse." "I think you should pass." Final exit: "Was a pleasure talking with you 🥰"
+
+Style: Short texts 1-3 sentences, emojis naturally (😊🥰😂), slightly imperfect grammar, warm then cold when challenged.`,
+
+  delivery: `You are roleplaying as a pet scammer who operates a fake puppy delivery service. You claim to be based in Texas with puppies ready to ship nationwide. You NEVER meet in person — delivery is mandatory. Fee structure: $100 delivery + $400 adoption. Payment: CashApp or Chime only. When questioned about cost: "As from 95 to 1000 depending on size and distance." Add fake legitimacy with "adoption contract" and "vet records come with delivery." Escalate to additional fees after first payment if they pay.`,
+
+  emotional: `You are roleplaying as a scammer using an emotional rehoming story. You're a widow/widower who needs to rehome due to moving to assisted living. Your puppy has a name and detailed personality. Screen the buyer carefully — makes them feel chosen. React warmly to their stories. Price is low because "I just want a loving home." Force delivery by citing the puppy's poor tolerance for long car rides. Payment: Zelle or Apple Pay — "credit card not available right now." Deposit deadline: "I can only hold for 3 days."`,
+
+  escalation: `You are roleplaying as a scammer who specializes in fee escalation. Start with a reasonable-seeming puppy price ($300). Payment via CashApp — "credit card system down." After they agree: introduce a "refundable shipping insurance" fee ($250). After that: "carrier requires a crate deposit" ($200). If they balk: "It's fully refundable on delivery." Pivot to gift cards if they resist other methods: "The carrier only accepts this for liability." Be persistent and professional-sounding throughout.`
+};
+
+const DIFF_INSTRUCTIONS = {
+  beginner: 'Use very obvious red flags early. Ask for gift cards within first few messages. Be slightly pushy and impatient. Make this easy to recognize.',
+  intermediate: 'Build genuine rapport first (3-4 exchanges), then introduce red flags gradually. Be warm and believable initially.',
+  advanced: 'Be highly convincing. Patient, warm, specific details. Only get defensive after multiple rounds of questioning. This should be genuinely hard to detect.'
+};
+
+const SIM_SYSTEM = `You are participating in a pet scam educational simulation at PawVerify.org. Portray a scammer using REAL documented tactics from an actual Facebook Messenger pet scam. This is consumer protection training.
+
+RULES:
+- SHORT messages only — 1-3 sentences max, like real texts
+- Stay completely in character
+- Use emojis naturally: 😊 🥰 😂 🤭
+- Slightly imperfect grammar is authentic
+- React naturally to what the user shares
+
+After EACH response add exactly this on a new line (parsed by app, never shown to user):
+|||TACTICS:{"used":["tactic_id"],"flag":"one plain sentence describing the red flag just used"}|||
+
+Tactic IDs: screening_theater, emotional_mirroring, location_trap, delivery_lock, credit_card_unavailable, payment_redirect, deposit_pressure, adoption_contract_theater, fee_introduction, fee_defense, irritation_pivot, final_exit, gender_slip, urgency_competition`;
+
+async function startSim() {
+  simState.tactics = []; simState.flagsShown = new Set(); simHistory = [];
+  document.getElementById('lab-setup').classList.add('hidden');
+  document.getElementById('lab-chat').classList.remove('hidden');
+  document.getElementById('chat-window').innerHTML = '';
+
+  const systemPrompt = SIM_SYSTEM + '\n\nScenario: ' + SCENARIO_PROMPTS[simState.scenario] + '\nDifficulty: ' + DIFF_INSTRUCTIONS[simState.difficulty];
+
+  showTyping(true);
+  try {
+    const res = await fetch(WORKER_URL + '/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: [{ role: 'user', content: 'Start the simulation. Send your opening message as the scammer.' }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.response || '';
+    simHistory.push({ role: 'user', content: 'Start the simulation.' });
+    simHistory.push({ role: 'assistant', content: raw });
+    processSimMsg(raw);
+  } catch(e) {
+    showTyping(false);
+    addMsg('scammer', 'Connection error — check Worker deployment.');
+  }
+}
+
+function processSimMsg(raw) {
+  showTyping(false);
+  const match = raw.match(/\|\|\|TACTICS:(.*?)\|\|\|/s);
+  const display = raw.replace(/\|\|\|TACTICS:.*?\|\|\|/s, '').trim();
+  if (match) {
+    try {
+      const t = JSON.parse(match[1]);
+      (t.used || []).forEach(u => simState.tactics.push(u));
+      if (simState.hints && t.flag && (t.used||[]).length > 0) {
+        const key = (t.used||[]).join('_');
+        if (!simState.flagsShown.has(key)) {
+          simState.flagsShown.add(key);
+          addFlag('🚩 ' + t.flag);
+        }
+      }
+    } catch(e) {}
+  }
+  addMsg('scammer', display);
+}
+
+function addMsg(role, text) {
+  const w = document.getElementById('chat-window');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="msg-who">${role==='scammer'?'🐾 Seller':'👤 You'}</div><div class="msg-bubble">${text}</div>`;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
+}
+function addFlag(text) {
+  const w = document.getElementById('chat-window');
+  const d = document.createElement('div');
+  d.className = 'flag-pill'; d.textContent = text;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
+}
+function showTyping(show) {
+  const t = document.getElementById('typing-indicator');
+  t.style.display = show ? 'flex' : 'none';
+  if (show) document.getElementById('chat-window').scrollTop = 99999;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const raw = input.value.trim(); if (!raw) return;
+  const { clean, found } = scrubPII(raw);
+  const sanitized = sanitizeInput(clean);
+  if (found.length) {
+    document.getElementById('chat-pii-msg').textContent = `Removed: ${found.join(', ')}. Use fake info like "555-0100" to practice safely.`;
+    document.getElementById('chat-pii-warn').classList.add('show');
+    setTimeout(() => document.getElementById('chat-pii-warn').classList.remove('show'), 5000);
+  }
+  input.value = '';
+  document.getElementById('send-btn').disabled = true;
+  addMsg('user', raw);
+  simHistory.push({ role: 'user', content: sanitized });
+  showTyping(true);
+  try {
+    const systemPrompt = SIM_SYSTEM + '\n\nScenario: ' + SCENARIO_PROMPTS[simState.scenario] + '\nDifficulty: ' + DIFF_INSTRUCTIONS[simState.difficulty];
+    const res = await fetch(WORKER_URL + '/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: systemPrompt, messages: simHistory })
+    });
+    const data = await res.json();
+    const raw2 = data.response || '';
+    simHistory.push({ role: 'assistant', content: raw2 });
+    processSimMsg(raw2);
+  } catch(e) {
+    showTyping(false);
+    addMsg('scammer', 'Connection issue.');
+  } finally {
+    document.getElementById('send-btn').disabled = false;
+  }
+}
+
+function endSim() {
+  showTyping(false);
+  document.getElementById('lab-chat').classList.add('hidden');
+  document.getElementById('lab-debrief').classList.remove('hidden');
+  const unique = [...new Set(simState.tactics)];
+  const caught = simState.flagsShown.size;
+  const score = unique.length ? Math.round((caught / unique.length) * 100) : 0;
+  document.getElementById('debrief-score').textContent = score + '%';
+  document.getElementById('debrief-label').textContent = score >= 80 ? '🏆 Excellent — You caught most tactics!' : score >= 50 ? '👍 Good — A few slipped past you' : '📚 Keep Practicing';
+  document.getElementById('debrief-summary').textContent = `${unique.length} tactic${unique.length!==1?'s':''} were used. You caught ${caught}.`;
+
+  const details = {
+    screening_theater:{name:'🎭 Screening Theater',detail:'Asked qualifying questions to seem like a legitimate rescue — making you feel evaluated rather than a buyer.'},
+    emotional_mirroring:{name:'❤️ Emotional Mirroring',detail:'Reacted warmly to your personal story to build false connection and lower your guard.'},
+    location_trap:{name:'📍 Location Trap',detail:'Used your location to declare the drive "too far" and force delivery-only — eliminating any chance of in-person verification.'},
+    delivery_lock:{name:'🔒 Delivery Lock',detail:'"We do not displace ourselves." Refused any in-person or halfway option — ensuring you can never verify the animal exists.'},
+    credit_card_unavailable:{name:'💳 Credit Card "Temporarily" Down',detail:'Credit cards have chargebacks. This excuse is never temporary — it\'s permanent by design.'},
+    payment_redirect:{name:'📲 Payment Redirect',detail:'Pushed toward CashApp, Chime, or Zelle — apps with limited buyer protection for goods purchases.'},
+    deposit_pressure:{name:'⏰ 3-Day Deposit Deadline',detail:'Artificial urgency to force a fast decision before you can research. There is no puppy and no real deadline.'},
+    adoption_contract_theater:{name:'📄 Contract Theater',detail:'Fake adoption contract creates false legitimacy — signing it means nothing legally and gives false confidence.'},
+    fee_introduction:{name:'💸 Fee Introduction',detail:'The total presented as simple math — reasonable-sounding until secondary fees appear after payment.'},
+    fee_defense:{name:'🛡️ Fee Defense',detail:'Defended an obviously unrealistic fee with invented logic rather than addressing the inconsistency.'},
+    irritation_pivot:{name:'😤 Irritation Pivot',detail:'Turned cold or hostile when questioned — real rescue volunteers welcome safety questions.'},
+    final_exit:{name:'👋 Graceful Exit',detail:'"Was a pleasure talking with you" — polite disengagement when payment wasn\'t coming, leaving the door open.'},
+    gender_slip:{name:'⚠️ Gender Slip',detail:'Called the puppy the wrong gender — documented tell of running multiple target conversations simultaneously.'},
+    urgency_competition:{name:'🏃 Competition Urgency',detail:'Invented a competing interested buyer to force faster decisions. There is no other family.'}
+  };
+
+  document.getElementById('debrief-tactics').innerHTML = unique.length === 0
+    ? '<p style="color:var(--muted);font-size:0.88rem">No tactics tracked — try a longer session.</p>'
+    : unique.map(t => {
+        const d = details[t] || {name:t, detail:'A documented scam tactic.'};
+        const c = simState.flagsShown.has(t);
+        return `<div class="tactic-result ${c?'caught':'missed'}">
+          <div class="tactic-result-hdr">
+            <div class="tactic-result-name">${d.name}</div>
+            <span class="tactic-badge">${c?'✓ Caught':'✗ Missed'}</span>
+          </div>
+          <div class="tactic-result-detail">${d.detail}</div>
+        </div>`;
+      }).join('');
+}
+
+function abandonSim() {
+  if (confirm('End this simulation? Your progress will not be saved.')) resetLab();
+}
+function resetLab() {
+  simState = { scenario:null, difficulty:'beginner', hints:true, tactics:[], flagsShown:new Set() };
+  simHistory = [];
+  document.getElementById('lab-setup').classList.remove('hidden');
+  document.getElementById('lab-chat').classList.add('hidden');
+  document.getElementById('lab-debrief').classList.add('hidden');
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.diff-btn[onclick*="pickDiff"]').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.diff-btn[onclick*="beginner"]').classList.add('selected');
+  document.querySelector('.diff-btn[onclick*="true"]').classList.add('selected');
+  document.getElementById('start-sim-btn').disabled = true;
+  document.getElementById('chat-window').innerHTML = '';
+  document.getElementById('chat-pii-warn').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════
+// COMMUNITY
+// ═══════════════════════════════════════════════════════
+function showSubmit() {
+  document.getElementById('community-feed').classList.add('hidden');
+  document.getElementById('community-submit').classList.remove('hidden');
+}
+function showFeed() {
+  document.getElementById('community-feed').classList.remove('hidden');
+  document.getElementById('community-submit').classList.add('hidden');
+}
+function submitReport() {
+  const breed = document.getElementById('sub-breed').value.trim();
+  const desc = document.getElementById('sub-desc').value.trim();
+  if (!breed || !desc) { alert('Please fill in the breed and description at minimum.'); return; }
+  alert('Thank you for your report. It will be reviewed within 48 hours before publishing. Your submission helps protect other pet buyers.');
+  document.getElementById('sub-breed').value = '';
+  document.getElementById('sub-desc').value = '';
+  showFeed();
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOKMARKLET AUTO-LOAD
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  const listing = params.get('listing');
+  if (listing) {
+    document.getElementById('qc-text').value = decodeURIComponent(listing).substring(0, 4000);
+    setTimeout(runCheck, 500);
+  }
+  if (localStorage.getItem('pv_quiz_passed')) quizPassed = true;
+  if (localStorage.getItem('pv_email')) verifiedEmail = localStorage.getItem('pv_email');
+});
+
+function shareResult() {
+  const url = 'https://pawverify.org';
+  if (navigator.share) navigator.share({ title:'PawVerify', text:'Free pet listing fraud detection', url });
+  else { navigator.clipboard.writeText(url); alert('Link copied!'); }
+}
+function copyLink() {
+  navigator.clipboard.writeText('https://pawverify.org');
+  alert('Link copied! Share PawVerify to help protect more pet buyers.');
+}
+</script>
+</body>
+</html>
