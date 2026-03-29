@@ -2,6 +2,7 @@ name = "pawverify-worker"
 main = "index.js"
 compatibility_date = "2024-01-01"
 account_id = "302f6a8d310b26efe5224bc69263b105"
+workers_dev = true
 
 # D1 Database binding
 [[d1_databases]]
@@ -9,10 +10,26 @@ binding = "DB"
 database_name = "pawverify-db"
 database_id = "16c73697-d201-48ee-90b1-cde65a83de99"
 
-# Routes — add back when pawverify.org domain is registered
-# [[routes]]
-# pattern = "pawverify.org/analyze"
-# zone_name = "pawverify.org"
+# Routes — API endpoints on custom domain
+[[routes]]
+pattern = "pawverify.org/analyze"
+zone_name = "pawverify.org"
+
+[[routes]]
+pattern = "pawverify.org/simulate"
+zone_name = "pawverify.org"
+
+[[routes]]
+pattern = "pawverify.org/register"
+zone_name = "pawverify.org"
+
+[[routes]]
+pattern = "pawverify.org/report"
+zone_name = "pawverify.org"
+
+[[routes]]
+pattern = "pawverify.org/health"
+zone_name = "pawverify.org"
 
 [vars]
 ENVIRONMENT = "production"
