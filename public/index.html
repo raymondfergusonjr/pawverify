@@ -9,21 +9,21 @@
 <style>
 /* ── DESIGN TOKENS ─────────────────────────────────── */
 :root {
-  --bg:       #080c08;
-  --surface:  #0f140f;
-  --surface2: #161d16;
-  --surface3: #1d271d;
-  --border:   #253025;
-  --border2:  #2e3d2e;
-  --green:    #4ade80;
-  --green2:   #22c55e;
-  --green-dim:#14532d;
-  --yellow:   #fbbf24;
-  --red:      #f87171;
-  --blue:     #60a5fa;
-  --text:     #e2ece2;
-  --muted:    #627562;
-  --muted2:   #4a5a4a;
+  --bg:       #f7f5f0;
+  --surface:  #ffffff;
+  --surface2: #f0ede6;
+  --surface3: #e8e4dc;
+  --border:   #e0dbd2;
+  --border2:  #d4cec5;
+  --green:    #16a34a;
+  --green2:   #15803d;
+  --green-dim:#dcfce7;
+  --yellow:   #d97706;
+  --red:      #dc2626;
+  --blue:     #2563eb;
+  --text:     #1a2e1a;
+  --muted:    #5f7060;
+  --muted2:   #8a9a8a;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -42,7 +42,7 @@ body{
 /* ── NAV ───────────────────────────────────────────── */
 nav{
   position:sticky;top:0;z-index:200;
-  background:rgba(8,12,8,0.96);
+  background:rgba(247,245,240,0.96);
   backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border);
   padding:0 1.5rem;
@@ -80,7 +80,7 @@ nav{
 }
 .hero::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 70% 60% at 50% -10%,rgba(74,222,128,0.07),transparent);
+  background:radial-gradient(ellipse 70% 60% at 50% -10%,rgba(22,163,74,0.06),transparent);
   pointer-events:none;
 }
 .hero-eyebrow{
@@ -93,7 +93,7 @@ nav{
   width:6px;height:6px;border-radius:50%;
   background:var(--green);animation:livepulse 2s infinite;
 }
-@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.4)}50%{opacity:0.6;box-shadow:0 0 0 4px rgba(74,222,128,0)}}
+@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,0.4)}50%{opacity:0.6;box-shadow:0 0 0 4px rgba(22,163,74,0)}}
 
 .hero h1{
   font-family:'Syne',sans-serif;
@@ -140,7 +140,7 @@ nav{
   font-weight:500;cursor:pointer;border:none;
   transition:all 0.2s;text-decoration:none;
 }
-.btn-primary{background:var(--green);color:#000;font-weight:700}
+.btn-primary{background:var(--green);color:#fff;font-weight:700}
 .btn-primary:hover{background:var(--green2);transform:translateY(-1px)}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 .btn-outline{
@@ -153,12 +153,12 @@ nav{
   border:none;font-size:0.82rem;padding:0.5rem 0.75rem;
 }
 .btn-ghost:hover{color:var(--text)}
-.btn-red{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
-.btn-red:hover{background:rgba(248,113,113,0.25)}
+.btn-red{background:rgba(220,38,38,0.08);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+.btn-red:hover{background:rgba(220,38,38,0.15)}
 
 .pii-warn{
-  background:rgba(251,191,36,0.08);
-  border:1px solid rgba(251,191,36,0.25);
+  background:rgba(217,119,6,0.07);
+  border:1px solid rgba(217,119,6,0.2);
   border-radius:10px;padding:0.6rem 0.9rem;
   font-size:0.8rem;color:var(--yellow);
   display:none;margin-top:0.5rem;
@@ -174,9 +174,9 @@ nav{
   border-radius:16px;padding:1.75rem;
   text-align:center;margin-bottom:1rem;
 }
-.result-banner.green{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25)}
-.result-banner.yellow{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25)}
-.result-banner.red{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25)}
+.result-banner.green{background:rgba(22,163,74,0.07);border:1px solid rgba(22,163,74,0.2)}
+.result-banner.yellow{background:rgba(217,119,6,0.07);border:1px solid rgba(217,119,6,0.2)}
+.result-banner.red{background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2)}
 .result-score{
   font-family:'Syne',sans-serif;
   font-size:3.5rem;font-weight:800;line-height:1;margin-bottom:0.4rem;
@@ -188,8 +188,8 @@ nav{
 .result-plain{font-size:0.9rem;color:var(--muted);max-width:460px;margin:0 auto}
 
 .emergency-box{
-  background:rgba(248,113,113,0.08);
-  border:1px solid rgba(248,113,113,0.3);
+  background:rgba(220,38,38,0.06);
+  border:1px solid rgba(220,38,38,0.2);
   border-radius:14px;padding:1.25rem;
   margin-bottom:1rem;display:none;
 }
@@ -287,7 +287,7 @@ nav{
 
 /* ── GATE (email verification) ─────────────────────── */
 .gate-overlay{
-  background:rgba(8,12,8,0.97);
+  background:rgba(255,255,255,0.97);
   border:1px solid var(--border2);
   border-radius:20px;padding:2.5rem;
   text-align:center;max-width:480px;margin:3rem auto;
@@ -366,8 +366,8 @@ nav{
 }
 .tactic-why{font-size:0.83rem;color:var(--muted)}
 .counter-box{
-  background:rgba(74,222,128,0.05);
-  border:1px solid rgba(74,222,128,0.2);
+  background:rgba(22,163,74,0.05);
+  border:1px solid rgba(22,163,74,0.2);
   border-radius:12px;padding:1.1rem;margin:0.875rem 0;
 }
 .counter-title{color:var(--green);font-weight:700;font-size:0.82rem;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.04em}
@@ -396,8 +396,8 @@ nav{
   font-family:'DM Sans',sans-serif;
 }
 .quiz-opt:hover{border-color:var(--green)}
-.quiz-opt.correct{border-color:var(--green);background:rgba(74,222,128,0.1);color:var(--green)}
-.quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(22,163,74,0.1);color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(220,38,38,0.1);color:var(--red)}
 .quiz-opt:disabled{cursor:not-allowed}
 .quiz-explain{
   background:var(--surface2);border:1px solid var(--border2);
@@ -414,7 +414,7 @@ nav{
 }
 .quiz-badge{
   display:inline-flex;align-items:center;gap:0.5rem;
-  background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);
+  background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);
   border-radius:12px;padding:0.5rem 1rem;
   font-size:0.85rem;color:var(--green);font-weight:600;
   margin:1rem auto;
@@ -423,7 +423,7 @@ nav{
 /* ── LAB (simulator) ───────────────────────────────── */
 .sim-label{
   display:inline-flex;align-items:center;gap:0.5rem;
-  background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);
+  background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);
   border-radius:8px;padding:0.3rem 0.75rem;
   font-size:0.78rem;font-weight:700;color:var(--red);
   margin-bottom:0.875rem;
@@ -439,7 +439,7 @@ nav{
   cursor:pointer;text-align:left;transition:all 0.2s;color:var(--text);
   font-family:'DM Sans',sans-serif;
 }
-.scenario-btn:hover,.scenario-btn.selected{border-color:var(--green);background:rgba(74,222,128,0.05)}
+.scenario-btn:hover,.scenario-btn.selected{border-color:var(--green);background:rgba(22,163,74,0.05)}
 .scenario-icon{font-size:1.5rem;margin-bottom:0.4rem}
 .scenario-name{font-weight:600;font-size:0.88rem;margin-bottom:0.2rem}
 .scenario-desc{font-size:0.78rem;color:var(--muted);line-height:1.4}
@@ -453,8 +453,8 @@ nav{
 .diff-btn.selected{border-color:var(--green);color:var(--green)}
 
 .chat-privacy{
-  background:rgba(74,222,128,0.04);
-  border:1px solid rgba(74,222,128,0.15);
+  background:rgba(22,163,74,0.04);
+  border:1px solid rgba(22,163,74,0.15);
   border-radius:12px;padding:0.875rem 1rem;
   font-size:0.8rem;color:var(--muted);
   margin-bottom:1rem;display:flex;gap:0.6rem;
@@ -476,9 +476,9 @@ nav{
   font-size:0.88rem;line-height:1.6;
 }
 .msg.scammer .msg-bubble{background:var(--surface2);border:1px solid var(--border)}
-.msg.user .msg-bubble{background:var(--green-dim);border:1px solid rgba(74,222,128,0.25)}
+.msg.user .msg-bubble{background:var(--green-dim);border:1px solid rgba(22,163,74,0.25)}
 .flag-pill{
-  background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);
+  background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.25);
   border-radius:8px;padding:0.4rem 0.75rem;
   font-size:0.78rem;color:var(--red);
   align-self:stretch;display:flex;gap:0.4rem;align-items:center;
@@ -522,8 +522,8 @@ nav{
 .tactic-result-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem}
 .tactic-result-name{font-weight:600;font-size:0.88rem}
 .tactic-badge{font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:5px;font-weight:700}
-.caught .tactic-badge{background:rgba(74,222,128,0.15);color:var(--green)}
-.missed .tactic-badge{background:rgba(248,113,113,0.15);color:var(--red)}
+.caught .tactic-badge{background:rgba(22,163,74,0.15);color:var(--green)}
+.missed .tactic-badge{background:rgba(220,38,38,0.15);color:var(--red)}
 .tactic-result-detail{font-size:0.82rem;color:var(--muted);line-height:1.5}
 
 /* ── COMMUNITY ─────────────────────────────────────── */
@@ -541,7 +541,7 @@ nav{
   border-radius:6px;padding:0.15rem 0.5rem;
   font-size:0.72rem;color:var(--muted);
 }
-.report-tag.red{border-color:rgba(248,113,113,0.3);color:var(--red);background:rgba(248,113,113,0.08)}
+.report-tag.red{border-color:rgba(220,38,38,0.3);color:var(--red);background:rgba(220,38,38,0.08)}
 .report-desc{font-size:0.85rem;color:var(--muted);line-height:1.6}
 .report-helpful{
   display:flex;align-items:center;gap:0.4rem;
@@ -598,19 +598,19 @@ footer a{color:var(--green);text-decoration:none}
 /* ── UTILITY ─────────────────────────────────────────── */
 .spinner{
   width:16px;height:16px;
-  border:2px solid rgba(0,0,0,0.25);
-  border-top-color:#000;border-radius:50%;
+  border:2px solid rgba(22,163,74,0.25);
+  border-top-color:var(--green);border-radius:50%;
   animation:spin 0.7s linear infinite;display:none;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .tag-green{
   display:inline-flex;align-items:center;gap:0.4rem;
-  background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);
+  background:rgba(22,163,74,0.07);border:1px solid rgba(22,163,74,0.18);
   border-radius:8px;padding:0.3rem 0.75rem;
   font-size:0.78rem;color:var(--green);
 }
 .hidden{display:none!important}
-input,textarea,select{color-scheme:dark}
+input,textarea,select{color-scheme:light}
 @media(max-width:500px){
   .nav-links{gap:0};
   .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
@@ -855,7 +855,7 @@ input,textarea,select{color-scheme:dark}
         <p>Practice in real time with an AI playing a scammer using <strong style="color:var(--green)">documented real tactics from an actual Facebook Messenger pet scam</strong>.</p>
         <div class="tag-green" style="margin-top:0.75rem">✅ Trained on a real conversation — exact language, real escalation, documented patterns</div>
       </div>
-      <div class="card" style="background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.2)">
+      <div class="card" style="background:rgba(217,119,6,0.05);border-color:rgba(217,119,6,0.2)">
         <div class="card-title" style="color:var(--yellow)">⚠️ Before You Start</div>
         <p style="font-size:0.88rem;color:var(--muted);line-height:1.7">This is a training simulation only. <strong style="color:var(--text)">Do not enter real personal information</strong> — use fake names, fake numbers (like 555-0100), and fake emails to practice realistically without any risk.<br><br>
         🔒 <strong style="color:var(--text)">Nothing is stored.</strong> No conversation is saved anywhere. When your session ends, everything is permanently gone. This tool exists only to prepare you.</p>
