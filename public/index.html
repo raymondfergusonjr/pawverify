@@ -653,9 +653,20 @@ input,textarea,select{color-scheme:light}
   .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
   .hero{padding:2.5rem 1rem 1.5rem}
 }
+/* ── TOAST ─────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);
+  background:var(--text);color:#fff;
+  padding:0.6rem 1.25rem;border-radius:10px;
+  font-size:0.88rem;font-family:'DM Sans',sans-serif;
+  opacity:0;transition:all 0.25s;pointer-events:none;z-index:9999;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+<div class="toast" id="toast"></div>
 
 <!-- NAV -->
 <nav>
@@ -1046,7 +1057,8 @@ input,textarea,select{color-scheme:light}
           </select>
           <label>What happened — describe the scam pattern (no personal info)</label>
           <textarea id="sub-desc" rows="5" placeholder="Describe what the seller said, what fees were requested, what happened when you questioned them. Focus on the tactics, not personal details."></textarea>
-          <button class="btn btn-primary" onclick="submitReport()" style="margin-top:1rem;width:100%;justify-content:center">Submit for Review</button>
+          <div class="input-error" id="report-error" style="margin-top:0.75rem"></div>
+          <button class="btn btn-primary" onclick="submitReport()" id="report-btn" style="margin-top:0.75rem;width:100%;justify-content:center">Submit for Review</button>
           <div style="font-size:0.75rem;color:var(--muted2);margin-top:0.5rem">Reports are reviewed within 48 hours before publishing. We remove any identifying information.</div>
         </div>
       </div>
@@ -1172,6 +1184,7 @@ async function submitGate() {
     return;
   }
   verifiedEmail = email;
+  localStorage.setItem('pv_email', email);
 
   const btn = document.getElementById('gate-btn');
   btn.disabled = true;
@@ -1366,18 +1379,27 @@ function showBookmarklet() {
   document.getElementById('hero-paths').style.display = 'none';
 }
 
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 function shareResult() {
   if (navigator.share) {
     navigator.share({ title: 'PawVerify Listing Check', url: 'https://pawverify.org' });
   } else {
     navigator.clipboard.writeText('https://pawverify.org');
-    alert('Link copied! Share PawVerify with others to help protect more pet buyers.');
+    showToast('Link copied! Share PawVerify to help protect more pet buyers.');
   }
 }
 
 function copyLink() {
   navigator.clipboard.writeText('https://pawverify.org');
-  alert('Link copied!');
+  showToast('Link copied! Share PawVerify to help protect more pet buyers.');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1830,14 +1852,51 @@ function showFeed() {
   document.getElementById('community-feed').classList.remove('hidden');
   document.getElementById('community-submit').classList.add('hidden');
 }
-function submitReport() {
+async function submitReport() {
   const breed = document.getElementById('sub-breed').value.trim();
+  const platform = document.getElementById('sub-platform').value;
+  const location = document.getElementById('sub-location').value.trim();
+  const payment = document.getElementById('sub-payment').value;
   const desc = document.getElementById('sub-desc').value.trim();
-  if (!breed || !desc) { alert('Please fill in the breed and description at minimum.'); return; }
-  alert('Thank you for your report. It will be reviewed within 48 hours before publishing. Your submission helps protect other pet buyers.');
+
+  const errEl = document.getElementById('report-error');
+  errEl.classList.remove('show');
+
+  if (!breed || !desc) {
+    errEl.textContent = 'Please fill in the breed and description at minimum.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (desc.length < 30) {
+    errEl.textContent = 'Description is too short — please describe the scam pattern in more detail.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('report-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    await fetch(WORKER_URL + '/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ breed, platform, location, payment, description: desc })
+    });
+  } catch(e) {
+    console.error('Report submit error:', e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit for Review';
+  }
+
   document.getElementById('sub-breed').value = '';
+  document.getElementById('sub-platform').value = '';
+  document.getElementById('sub-location').value = '';
+  document.getElementById('sub-payment').value = '';
   document.getElementById('sub-desc').value = '';
   showFeed();
+  showToast('Report submitted — thank you for helping protect other pet buyers.');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1854,15 +1913,7 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('pv_email')) verifiedEmail = localStorage.getItem('pv_email');
 });
 
-function shareResult() {
-  const url = 'https://pawverify.org';
-  if (navigator.share) navigator.share({ title:'PawVerify', text:'Free pet listing fraud detection', url });
-  else { navigator.clipboard.writeText(url); alert('Link copied!'); }
-}
-function copyLink() {
-  navigator.clipboard.writeText('https://pawverify.org');
-  alert('Link copied! Share PawVerify to help protect more pet buyers.');
-}
+
 </script>
 </body>
 </html>
