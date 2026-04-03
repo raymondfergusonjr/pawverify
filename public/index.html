@@ -653,6 +653,20 @@ input,textarea,select{color-scheme:light}
   .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
   .hero{padding:2.5rem 1rem 1.5rem}
 }
+/* ── SCAN STATUS ─────────────────────────────────────── */
+.scan-status{
+  display:none;align-items:center;justify-content:center;gap:0.5rem;
+  margin-top:0.75rem;font-size:0.85rem;color:var(--muted);
+}
+.scan-status.show{display:flex}
+.scan-status-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:pulse-dot 1.2s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.4;transform:scale(0.7)}
+}
 /* ── HOW IT WORKS ────────────────────────────────────── */
 .how-it-works{
   max-width:680px;margin:1.5rem auto 0.5rem;
@@ -766,6 +780,10 @@ input,textarea,select{color-scheme:light}
         </button>
         <button class="btn btn-outline" onclick="showBookmarklet()">🔖 Get Bookmarklet</button>
         <button class="btn btn-outline" onclick="showAlreadyPaid()">💸 Already Paid?</button>
+      </div>
+      <div class="scan-status" id="scan-status">
+        <div class="scan-status-dot"></div>
+        <span id="scan-status-msg">Reading listing...</span>
       </div>
     </div>
 
@@ -1400,6 +1418,24 @@ async function runCheck() {
   const btnTxt = document.getElementById('qc-btn-txt');
   btn.disabled = true; spin.style.display = 'inline-block'; btnTxt.textContent = 'Analyzing...';
 
+  const statusEl = document.getElementById('scan-status');
+  const statusMsg = document.getElementById('scan-status-msg');
+  const statusMessages = [
+    'Reading listing...',
+    'Checking price patterns...',
+    'Looking for red flags...',
+    'Analyzing seller language...',
+    'Reviewing payment signals...',
+    'Almost done...'
+  ];
+  let statusIdx = 0;
+  statusMsg.textContent = statusMessages[0];
+  statusEl.classList.add('show');
+  const statusTimer = setInterval(() => {
+    statusIdx = Math.min(statusIdx + 1, statusMessages.length - 1);
+    statusMsg.textContent = statusMessages[statusIdx];
+  }, 1800);
+
   try {
     const res = await fetch(WORKER_URL + '/analyze', {
       method: 'POST',
@@ -1417,6 +1453,8 @@ async function runCheck() {
     showInputError(e.message || 'Analysis failed — please try again.');
     console.error(e);
   } finally {
+    clearInterval(statusTimer);
+    statusEl.classList.remove('show');
     btn.disabled = false; spin.style.display = 'none'; btnTxt.textContent = 'Check This Listing';
   }
 }
