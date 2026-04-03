@@ -653,37 +653,27 @@ input,textarea,select{color-scheme:light}
   .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
   .hero{padding:2.5rem 1rem 1.5rem}
 }
-/* ── EARLY FEEDBACK ─────────────────────────────────── */
-.feedback-section{
+/* ── HOW IT WORKS ────────────────────────────────────── */
+.how-it-works{
   max-width:680px;margin:1.5rem auto 0.5rem;
-  overflow:hidden;
-}
-.feedback-label{
-  font-size:0.72rem;font-weight:600;text-transform:uppercase;
-  letter-spacing:0.08em;color:var(--muted2);margin-bottom:0.9rem;text-align:center;
-}
-.feedback-track{
-  display:flex;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);
-}
-.feedback-card{
-  min-width:100%;background:var(--surface);border:1px solid var(--border);
+  background:var(--surface);border:1px solid var(--border);
   border-radius:14px;padding:1.25rem 1.5rem;
 }
-.feedback-quote{
-  font-size:0.9rem;color:var(--muted);line-height:1.75;
-  font-style:italic;margin-bottom:0.75rem;
+.hiw-label{
+  font-size:0.72rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.08em;color:var(--muted2);margin-bottom:1rem;text-align:center;
 }
-.feedback-quote::before{content:'\201C';color:var(--green);font-size:1.4rem;line-height:0;vertical-align:-0.3em;margin-right:0.1em}
-.feedback-author{font-size:0.8rem;font-weight:600;color:var(--muted2)}
-.feedback-dots{
-  display:flex;justify-content:center;gap:0.45rem;margin-top:0.85rem;
+.hiw-steps{display:flex;flex-direction:column;gap:0.85rem}
+.hiw-step{display:flex;gap:1rem;align-items:flex-start}
+.hiw-num{
+  flex-shrink:0;width:28px;height:28px;border-radius:50%;
+  background:var(--green);color:#fff;
+  font-size:0.8rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:0.1rem;
 }
-.feedback-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--border2);cursor:pointer;
-  transition:background 0.2s,transform 0.2s;border:none;padding:0;
-}
-.feedback-dot.active{background:var(--green);transform:scale(1.25)}
+.hiw-text{display:flex;flex-direction:column;gap:0.15rem;font-size:0.88rem}
+.hiw-text strong{color:var(--text)}
+.hiw-text span{color:var(--muted);line-height:1.6}
 /* ── WHAT WE CHECK ─────────────────────────────────── */
 .what-we-check{
   background:var(--surface);border:1px solid var(--border);
@@ -852,28 +842,23 @@ input,textarea,select{color-scheme:light}
       <button class="btn btn-ghost" onclick="document.getElementById('bookmarklet-panel').style.display='none'">← Back</button>
     </div>
 
-    <!-- EARLY FEEDBACK -->
-    <div class="feedback-section" id="feedback-section">
-      <div class="feedback-label">Early Feedback</div>
-      <div class="feedback-track" id="feedback-track">
-        <div class="feedback-card">
-          <div class="feedback-quote">"I almost sent $400 for a puppy that didn't exist. This tool flagged every single red flag I had missed. The shipping fee request was the one that got me."</div>
-          <div class="feedback-author">— M.T., Florida</div>
+    <!-- HOW IT WORKS -->
+    <div class="how-it-works">
+      <div class="hiw-label">How it works</div>
+      <div class="hiw-steps">
+        <div class="hiw-step">
+          <div class="hiw-num">1</div>
+          <div class="hiw-text"><strong>Copy the listing</strong><span>Paste anything — the listing description, seller messages, payment requests, or all of it together.</span></div>
         </div>
-        <div class="feedback-card">
-          <div class="feedback-quote">"Simple and fast. I pasted the listing, got the result in seconds, and immediately knew something was off. Ended up being a scam. Saved my daughter a lot of heartbreak."</div>
-          <div class="feedback-author">— D.R., Ohio</div>
+        <div class="hiw-step">
+          <div class="hiw-num">2</div>
+          <div class="hiw-text"><strong>AI scans for red flags</strong><span>The tool checks for known scam patterns — price manipulation, fake urgency, suspicious payment methods, and more.</span></div>
         </div>
-        <div class="feedback-card">
-          <div class="feedback-quote">"Love that there's no sign-up. I checked three listings in a row before finding one that felt legitimate. The next step suggestions were actually useful."</div>
-          <div class="feedback-author">— J.K., Texas</div>
-        </div>
-        <div class="feedback-card">
-          <div class="feedback-quote">"Showed this to my mom after she almost got scammed buying a French Bulldog. She now uses it every time she sees a listing she likes. Easy enough for anyone."</div>
-          <div class="feedback-author">— A.P., California</div>
+        <div class="hiw-step">
+          <div class="hiw-num">3</div>
+          <div class="hiw-text"><strong>You get a clear result</strong><span>Low, medium, or high risk — with specific flags found and exactly what to do next. No jargon, no guesswork.</span></div>
         </div>
       </div>
-      <div class="feedback-dots" id="feedback-dots"></div>
     </div>
 
     <!-- PATH CARDS -->
@@ -2085,44 +2070,6 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('pv_quiz_passed')) quizPassed = true;
   if (localStorage.getItem('pv_email')) verifiedEmail = localStorage.getItem('pv_email');
 });
-
-// ═══════════════════════════════════════════════════════
-// FEEDBACK ROTATOR
-// ═══════════════════════════════════════════════════════
-(function() {
-  let current = 0, timer = null;
-  function init() {
-    const track = document.getElementById('feedback-track');
-    const dotsEl = document.getElementById('feedback-dots');
-    if (!track || !dotsEl) return;
-    const cards = track.querySelectorAll('.feedback-card');
-    const count = cards.length;
-    dotsEl.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-      const d = document.createElement('button');
-      d.className = 'feedback-dot' + (i === 0 ? ' active' : '');
-      d.setAttribute('aria-label', 'Feedback ' + (i+1));
-      d.addEventListener('click', () => { goTo(i); resetTimer(); });
-      dotsEl.appendChild(d);
-    }
-    function goTo(n) {
-      current = (n + count) % count;
-      track.style.transform = 'translateX(-' + (current * 100) + '%)';
-      dotsEl.querySelectorAll('.feedback-dot').forEach((d,i) =>
-        d.classList.toggle('active', i === current));
-    }
-    function resetTimer() {
-      clearInterval(timer);
-      timer = setInterval(() => goTo(current + 1), 6000);
-    }
-    resetTimer();
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
 
 // ═══════════════════════════════════════════════════════
 // CONTACT FORM
