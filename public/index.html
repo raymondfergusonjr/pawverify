@@ -653,6 +653,29 @@ input,textarea,select{color-scheme:light}
   .nav-btn{padding:0.35rem 0.5rem;font-size:0.78rem}
   .hero{padding:2.5rem 1rem 1.5rem}
 }
+/* ── WHAT WE CHECK ─────────────────────────────────── */
+.what-we-check{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem 1.5rem;margin:1rem 0 0.5rem;
+  max-width:680px;margin-left:auto;margin-right:auto;
+}
+.wwc-title{
+  font-size:0.78rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.06em;color:var(--muted2);margin-bottom:0.75rem;text-align:left;
+}
+.wwc-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1rem;
+  font-size:0.84rem;color:var(--muted);text-align:left;
+}
+.wwc-item{display:flex;gap:0.4rem;align-items:flex-start;line-height:1.5}
+@media(max-width:500px){.wwc-grid{grid-template-columns:1fr}}
+/* ── ACTIONS SUBTITLE ──────────────────────────────── */
+.actions-subtitle{
+  font-size:0.75rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.06em;color:var(--muted2);margin-bottom:0.5rem;
+}
+.action-item.flag{background:rgba(220,38,38,0.04)}
+.action-item.flag .action-flag{color:var(--red);font-size:1rem;flex-shrink:0}
 /* ── TOAST ─────────────────────────────────────────── */
 .toast{
   position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(2rem);
@@ -689,6 +712,24 @@ input,textarea,select{color-scheme:light}
     <div class="hero-eyebrow"><span class="live-dot"></span> Free · No Account Required · No Data Stored</div>
     <h1>Is This Pet Listing <em>Real</em>?</h1>
     <p class="hero-sub">Paste any listing and get an answer in <strong>60 seconds</strong>.<br>AI-powered fraud detection built on real documented scam conversations.</p>
+
+    <!-- WHAT WE CHECK -->
+    <div class="what-we-check">
+      <div class="wwc-title">What the scan looks for</div>
+      <div class="wwc-grid">
+        <div class="wwc-item">💰 <span>Price too low or too high for the breed</span></div>
+        <div class="wwc-item">💳 <span>Requests for gift cards, wire transfers, or Zelle</span></div>
+        <div class="wwc-item">⏰ <span>Urgency pressure — "must rehome today," "deploy soon"</span></div>
+        <div class="wwc-item">✈️ <span>Shipping-only offers with transport/delivery fees</span></div>
+        <div class="wwc-item">📷 <span>Generic or stolen listing language and photos</span></div>
+        <div class="wwc-item">📵 <span>Refusal to video call or meet in person</span></div>
+        <div class="wwc-item">📝 <span>Inconsistent seller details across messages</span></div>
+        <div class="wwc-item">🌍 <span>Location mismatches or overseas backstory</span></div>
+      </div>
+      <div style="text-align:center;margin-top:0.75rem">
+        <button class="btn btn-ghost" style="font-size:0.8rem;padding:0.3rem 0.9rem" onclick="loadSampleResult()">See a sample scan result →</button>
+      </div>
+    </div>
 
     <!-- QUICK CHECK TOOL -->
     <div class="quick-check">
@@ -812,8 +853,11 @@ input,textarea,select{color-scheme:light}
 
   <footer>
     🐾 <strong>PawVerify</strong> — Free pet listing fraud protection<br>
-    <a href="#">Privacy Policy</a> · <a href="#">About</a> · <a href="#">Report a Bug</a><br>
-    Not affiliated with any pet platform. Built as a public protection service.
+    <a href="#" onclick="show('privacy');return false;">Privacy Policy</a> ·
+    <a href="#" onclick="show('disclaimer');return false;">Disclaimer</a> ·
+    <a href="#" onclick="show('about');return false;">About &amp; Contact</a><br>
+    Not affiliated with any pet platform. Built as a public protection service.<br>
+    <span style="color:var(--muted2);font-size:0.75rem">Results are AI-assisted and may not catch every scam or may flag legitimate listings. Always verify independently.</span>
   </footer>
 </div>
 
@@ -1337,6 +1381,29 @@ async function runCheck() {
   }
 }
 
+const NEXT_STEPS = {
+  HIGH: [
+    { icon:'🚫', text:'Stop all contact with this seller immediately' },
+    { icon:'📸', text:'Screenshot the listing, all messages, and payment details before anything disappears' },
+    { icon:'🔍', text:'Reverse image search every photo — right-click → "Search image" on Google' },
+    { icon:'🏦', text:'If you already sent money, call your bank or payment app fraud line now' },
+    { icon:'📢', text:'Report the listing on the platform and warn others in local groups' },
+  ],
+  MEDIUM: [
+    { icon:'📹', text:'Ask the seller for a live video call showing the animal — scammers almost always refuse' },
+    { icon:'🔍', text:'Reverse image search all photos to check if they appear on other listings' },
+    { icon:'🤝', text:'Insist on meeting in a public place before any payment — never pay first' },
+    { icon:'💬', text:'Ask specific questions about vet history, breed quirks, and local area — vague answers are a red flag' },
+    { icon:'💳', text:'If you proceed, use a credit card through a traceable platform — never gift cards or wire transfer' },
+  ],
+  LOW: [
+    { icon:'✅', text:'Still meet in person before any payment — even low-risk listings should be verified face to face' },
+    { icon:'🔍', text:'Quick reverse image search on the photos takes 30 seconds and can save thousands' },
+    { icon:'💳', text:'Pay with a credit card or platform escrow if available — avoid Zelle, Venmo, or gift cards' },
+    { icon:'📋', text:'Ask for vet records and breeder references if applicable' },
+  ]
+};
+
 function renderResult(r) {
   document.getElementById('hero-paths').style.display = 'none';
   document.getElementById('qc-pii').classList.remove('show');
@@ -1359,18 +1426,45 @@ function renderResult(r) {
     document.getElementById('learn-nudge').style.display = 'flex';
   }
 
+  // AI flags from Claude
   const actionsList = document.getElementById('actions-list');
-  actionsList.innerHTML = (r.actions || ['Verify the seller in person before any payment','Reverse image search all photos','Never send gift cards or wire transfers']).map((a,i) =>
-    `<div class="action-item"><span class="action-num">${i+1}</span><span>${a}</span></div>`
-  ).join('');
+  const aiFlags = (r.actions || []);
+  const nextSteps = NEXT_STEPS[level] || NEXT_STEPS.MEDIUM;
+  actionsList.innerHTML =
+    (aiFlags.length ? `<div class="actions-subtitle">What the scan found</div>` + aiFlags.map(a =>
+      `<div class="action-item flag"><span class="action-flag">⚑</span><span>${a}</span></div>`).join('') : '') +
+    `<div class="actions-subtitle" style="margin-top:${aiFlags.length?'1rem':'0'}">What to do next</div>` +
+    nextSteps.map((s,i) =>
+      `<div class="action-item"><span class="action-num">${i+1}</span><span>${s.icon} ${s.text}</span></div>`
+    ).join('');
+
+  // Always show disclaimer
+  document.getElementById('result-disclaimer').style.display = 'block';
 
   document.getElementById('qc-text').style.display = 'none';
   document.querySelector('.quick-check-row').style.display = 'none';
   document.querySelector('.quick-check-label').style.display = 'none';
 }
 
+function loadSampleResult() {
+  renderResult({
+    level: 'HIGH',
+    score: 87,
+    summary: 'Multiple high-risk signals detected. This listing closely matches known pet shipping scam patterns — price below market, transport fee request, and pressure to pay via gift card.',
+    actions: [
+      'Price ($250) is well below typical market rate for a purebred French Bulldog',
+      'Seller claims to be military deployed overseas — common cover story in pet scams',
+      'Requests gift card payment for "pet transport insurance" — a near-universal scam signal',
+      'Refuses video call, insists on text only',
+      'Listing photos appear on multiple sites with different seller names'
+    ]
+  });
+  document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function resetCheck() {
   document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('result-disclaimer').style.display = 'none';
   document.getElementById('emergency-box').classList.remove('show');
   document.getElementById('learn-nudge').style.display = 'none';
   document.getElementById('qc-text').style.display = 'block';
@@ -1937,7 +2031,161 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('pv_email')) verifiedEmail = localStorage.getItem('pv_email');
 });
 
+// ═══════════════════════════════════════════════════════
+// CONTACT FORM
+// ═══════════════════════════════════════════════════════
+async function submitContact() {
+  const name = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const msg = document.getElementById('contact-msg').value.trim();
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const errEl = document.getElementById('contact-error');
+  const btn = document.getElementById('contact-btn');
+
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
+  if (!emailRe.test(email)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
+  if (msg.length < 10) { errEl.textContent = 'Please enter a message (at least 10 characters).'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const res = await fetch(WORKER_URL + '/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message: msg })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'Send failed');
+    document.getElementById('contact-form-wrap').style.display = 'none';
+    document.getElementById('contact-success').style.display = 'block';
+  } catch(e) {
+    errEl.textContent = e.message || 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Message';
+  }
+}
 
 </script>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- ABOUT & CONTACT                                   -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-about" class="section">
+  <div class="container" style="max-width:680px;padding:3rem 1.5rem">
+    <button class="btn btn-ghost" onclick="show('home')" style="margin-bottom:1.5rem">← Back</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin-bottom:0.5rem">About PawVerify</h2>
+    <p style="color:var(--muted);font-size:0.92rem;line-height:1.8;margin-bottom:1.5rem">
+      PawVerify is a free, nonprofit-backed tool built to protect pet buyers from listing scams.
+      Every year, tens of thousands of people lose money to fraudulent pet listings — fake breeders,
+      shipping scams, and phantom puppies. Most victims never see it coming because the scam playbooks
+      are sophisticated and constantly evolving.
+    </p>
+    <p style="color:var(--muted);font-size:0.92rem;line-height:1.8;margin-bottom:1.5rem">
+      This tool is powered by AI trained on real documented scam conversations. It's completely free,
+      requires no account, and stores nothing you type. It's being built toward a 501(c)(3) nonprofit —
+      built to protect people, not to profit from them.
+    </p>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:2rem;font-size:0.88rem;color:var(--muted);line-height:1.7">
+      <strong style="color:var(--text);display:block;margin-bottom:0.4rem">Important limits to understand</strong>
+      PawVerify is an AI-assisted screening tool, not a guarantee. It can flag legitimate listings as suspicious
+      (false positives) and may occasionally miss a real scam (false negatives). Think of it as a second opinion,
+      not a final answer. Always verify sellers independently before sending any money.
+    </div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:1rem">Contact Us</h3>
+    <div id="contact-form-wrap">
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem;line-height:1.7">
+        Have a question, spotted a bug, or want to share feedback? We read every message.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <input id="contact-name" type="text" placeholder="Your name" style="padding:0.65rem 0.9rem;border:1px solid var(--border2);border-radius:8px;font-size:0.9rem;background:var(--surface);font-family:inherit;color:var(--text)">
+        <input id="contact-email" type="email" placeholder="your@email.com" style="padding:0.65rem 0.9rem;border:1px solid var(--border2);border-radius:8px;font-size:0.9rem;background:var(--surface);font-family:inherit;color:var(--text)">
+        <textarea id="contact-msg" placeholder="Your message..." rows="5" style="padding:0.65rem 0.9rem;border:1px solid var(--border2);border-radius:8px;font-size:0.9rem;background:var(--surface);font-family:inherit;color:var(--text);resize:vertical"></textarea>
+        <div id="contact-error" style="display:none;color:var(--red);font-size:0.85rem;padding:0.5rem 0.75rem;background:rgba(220,38,38,0.07);border-radius:6px"></div>
+        <button class="btn btn-primary" id="contact-btn" onclick="submitContact()" style="justify-content:center">Send Message</button>
+      </div>
+    </div>
+    <div id="contact-success" style="display:none;text-align:center;padding:2rem;background:var(--green-dim);border-radius:12px;color:var(--green)">
+      <div style="font-size:2rem;margin-bottom:0.5rem">✅</div>
+      <strong>Message sent!</strong><br>
+      <span style="font-size:0.88rem;color:var(--muted)">We'll get back to you as soon as we can.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- PRIVACY POLICY                                    -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-privacy" class="section">
+  <div class="container" style="max-width:680px;padding:3rem 1.5rem">
+    <button class="btn btn-ghost" onclick="show('home')" style="margin-bottom:1.5rem">← Back</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin-bottom:1.5rem">Privacy Policy</h2>
+    <div style="font-size:0.9rem;color:var(--muted);line-height:1.85;display:flex;flex-direction:column;gap:1.25rem">
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Listing text you submit</strong>
+        Text you paste into the scanner is sent to our AI model to generate a fraud analysis. It is not logged, stored, or associated with you in any way. We do not retain your listing after the analysis is returned.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Email address (optional)</strong>
+        If you choose to register for access to Learn, Lab, or Community features, your email is stored in our database. It is used only to grant access and to notify you of new features. It is never sold, shared with third parties, or used for advertising. You can request deletion at any time by contacting us.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Contact form submissions</strong>
+        Messages sent through the contact form are stored so we can respond to them. They are not shared externally.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Analytics and tracking</strong>
+        PawVerify does not use Google Analytics, Facebook Pixel, or any third-party tracking. We collect basic, anonymous usage counts (number of scans per day) for capacity management only. No personal data is involved.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Cookies and local storage</strong>
+        We use your browser's local storage to remember if you've registered (so you don't have to enter your email again). No tracking cookies are set.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Questions</strong>
+        Contact us through the <a href="#" onclick="show('about');return false;" style="color:var(--green)">About &amp; Contact</a> page.
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted2)">Last updated: April 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- DISCLAIMER                                        -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="section-disclaimer" class="section">
+  <div class="container" style="max-width:680px;padding:3rem 1.5rem">
+    <button class="btn btn-ghost" onclick="show('home')" style="margin-bottom:1.5rem">← Back</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;margin-bottom:1.5rem">Disclaimer</h2>
+    <div style="font-size:0.9rem;color:var(--muted);line-height:1.85;display:flex;flex-direction:column;gap:1.25rem">
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">AI-assisted, not guaranteed</strong>
+        PawVerify uses artificial intelligence to identify patterns commonly associated with pet listing fraud. This is a screening tool, not a definitive verdict. AI models can and do make mistakes.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">False positives</strong>
+        Legitimate listings may be flagged as suspicious. An unusual price, a seller who travels for work, or unconventional payment preferences can all trigger warnings even when the listing is genuine. A HIGH risk score does not mean the listing is definitely a scam.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">False negatives</strong>
+        Some scams may not be detected — especially new tactics or highly polished fraudulent listings. A LOW risk score does not mean the listing is safe. Always verify independently.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Not legal or financial advice</strong>
+        Nothing on this site constitutes legal advice, financial advice, or a professional assessment of any kind. If you believe you have been defrauded, contact your financial institution and file a report with the FTC at <a href="https://reportfraud.ftc.gov" target="_blank" style="color:var(--green)">reportfraud.ftc.gov</a>.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">No affiliation</strong>
+        PawVerify is not affiliated with, endorsed by, or connected to any pet marketplace, breeder platform, or payment service. All trademarks belong to their respective owners.
+      </div>
+      <div>
+        <strong style="color:var(--text);display:block;margin-bottom:0.3rem">Use at your own risk</strong>
+        By using PawVerify, you acknowledge that results are informational only and that you are responsible for any decisions made based on them.
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted2)">Last updated: April 2026</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

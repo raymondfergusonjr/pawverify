@@ -62,6 +62,9 @@ export default {
       if (path === '/report' && request.method === 'POST') {
         return await handleReport(request, env);
       }
+      if (path === '/contact' && request.method === 'POST') {
+        return await handleContact(request, env);
+      }
       if (path === '/health') {
         return corsResponse({ status: 'ok', timestamp: Date.now() }, 200, request, env);
       }
@@ -246,6 +249,33 @@ async function handleReport(request, env) {
   } catch (err) {
     console.error('Report error:', err);
     return corsResponse({ success: true }, 200, request, env);
+  }
+}
+
+// ── CONTACT FORM ──────────────────────────────────────
+async function handleContact(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return corsResponse({ error: 'Invalid request' }, 400, request, env); }
+
+  const name = String(body.name || '').substring(0, 100).trim();
+  const email = String(body.email || '').substring(0, 200).trim();
+  const message = String(body.message || '').substring(0, 2000).trim();
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  if (!name || !emailRe.test(email) || message.length < 10) {
+    return corsResponse({ error: 'Invalid input', message: 'Name, valid email, and message required.' }, 400, request, env);
+  }
+
+  try {
+    if (env.DB) {
+      await env.DB.prepare(
+        'INSERT INTO contacts (name, email, message, submitted_at) VALUES (?, ?, ?, ?)'
+      ).bind(name, email, message, new Date().toISOString()).run();
+    }
+    return corsResponse({ ok: true }, 200, request, env);
+  } catch (err) {
+    console.error('Contact error:', err);
+    return corsResponse({ ok: true }, 200, request, env);
   }
 }
 

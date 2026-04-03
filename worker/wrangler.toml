@@ -31,5 +31,9 @@ zone_name = "pawverify.org"
 pattern = "pawverify.org/health"
 zone_name = "pawverify.org"
 
+[[routes]]
+pattern = "pawverify.org/contact"
+zone_name = "pawverify.org"
+
 [vars]
 ENVIRONMENT = "production"
