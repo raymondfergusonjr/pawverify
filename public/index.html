@@ -1162,7 +1162,16 @@ function show(id) {
 function showGated(id, label) {
   if (verifiedEmail) { show(id); return; }
   document.getElementById('gate-title').textContent = 'Unlock ' + label;
+  document.getElementById('gate-desc').innerHTML = 'The Learn modules, Lab simulator, and Community are behind a simple email verification to protect the educational content from being used by the very scammers we\'re training you to spot.<br><br>Enter your email to get instant access. No spam — we\'ll only contact you when new scenarios or features launch.';
   pendingSection = id;
+  show('gate');
+}
+
+function showWaitlistGate() {
+  if (verifiedEmail) return;
+  document.getElementById('gate-title').textContent = 'Join the Waitlist';
+  document.getElementById('gate-desc').innerHTML = 'PawVerify hit today\'s check limit, but we\'re growing fast.<br><br>Drop your email and we\'ll notify you as soon as capacity opens up — and when new features launch. No spam, unsubscribe anytime.';
+  pendingSection = 'home';
   show('gate');
 }
 
@@ -1242,9 +1251,10 @@ function sanitizeInput(text) {
 // ═══════════════════════════════════════════════════════
 // ANALYZER
 // ═══════════════════════════════════════════════════════
-function showInputError(msg) {
+function showInputError(msg, html) {
   const el = document.getElementById('qc-error');
-  document.getElementById('qc-error-msg').textContent = msg;
+  const span = document.getElementById('qc-error-msg');
+  if (html) { span.innerHTML = html; } else { span.textContent = msg; }
   el.classList.add('show');
   document.getElementById('qc-text').classList.add('invalid');
 }
@@ -1313,6 +1323,10 @@ async function runCheck() {
       body: JSON.stringify({ listing: sanitized })
     });
     const data = await res.json();
+    if (data.error === 'capacity') {
+      showInputError(null, `PawVerify is at capacity for today. Resets at midnight. <a href="#" onclick="showWaitlistGate();return false;" style="color:inherit;text-decoration:underline;font-weight:600">Join the waitlist →</a>`);
+      return;
+    }
     if (data.error) throw new Error(data.message || data.error);
     renderResult(data);
   } catch(e) {
@@ -1697,6 +1711,11 @@ async function startSim() {
       })
     });
     const data = await res.json();
+    if (data.error === 'capacity') {
+      showTyping(false);
+      addMsg('scammer', 'The simulator is at capacity for today. Resets at midnight. <a href="#" onclick="showWaitlistGate();return false;" style="text-decoration:underline;font-weight:600">Join the waitlist →</a>');
+      return;
+    }
     const raw = data.response || '';
     simHistory.push({ role: 'user', content: 'Start the simulation.' });
     simHistory.push({ role: 'assistant', content: raw });
@@ -1769,6 +1788,11 @@ async function sendMsg() {
       body: JSON.stringify({ system: systemPrompt, messages: simHistory })
     });
     const data = await res.json();
+    if (data.error === 'capacity') {
+      showTyping(false);
+      addMsg('scammer', 'The simulator is at capacity for today. Resets at midnight. <a href="#" onclick="showWaitlistGate();return false;" style="text-decoration:underline;font-weight:600">Join the waitlist →</a>');
+      return;
+    }
     const raw2 = data.response || '';
     simHistory.push({ role: 'assistant', content: raw2 });
     processSimMsg(raw2);
