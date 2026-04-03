@@ -655,17 +655,44 @@ input,textarea,select{color-scheme:light}
 }
 /* ── SCAN STATUS ─────────────────────────────────────── */
 .scan-status{
-  display:none;align-items:center;justify-content:center;gap:0.5rem;
-  margin-top:0.75rem;font-size:0.85rem;color:var(--muted);
+  display:none;flex-direction:column;align-items:center;
+  gap:0.5rem;margin-top:1rem;
 }
 .scan-status.show{display:flex}
-.scan-status-dot{
-  width:8px;height:8px;border-radius:50%;background:var(--green);
-  animation:pulse-dot 1.2s ease-in-out infinite;flex-shrink:0;
+.dog-track{
+  width:200px;height:36px;position:relative;overflow:hidden;
 }
-@keyframes pulse-dot{
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:0.4;transform:scale(0.7)}
+.dog-walker{
+  position:absolute;font-size:1.5rem;top:4px;
+  animation:dog-walk 2.2s linear infinite;
+}
+@keyframes dog-walk{
+  0%  {left:-2rem;transform:scaleX(1)}
+  48% {left:calc(100% + 0.5rem);transform:scaleX(1)}
+  49% {left:calc(100% + 0.5rem);transform:scaleX(-1)}
+  50% {left:calc(100% + 0.5rem);transform:scaleX(-1)}
+  98% {left:-2rem;transform:scaleX(-1)}
+  99% {left:-2rem;transform:scaleX(1)}
+  100%{left:-2rem;transform:scaleX(1)}
+}
+.dog-paws{
+  display:flex;gap:0.3rem;
+}
+.dog-paw{
+  font-size:0.65rem;opacity:0;animation:paw-appear 2.2s linear infinite;
+}
+.dog-paw:nth-child(1){animation-delay:0s}
+.dog-paw:nth-child(2){animation-delay:0.4s}
+.dog-paw:nth-child(3){animation-delay:0.8s}
+.dog-paw:nth-child(4){animation-delay:1.2s}
+.dog-paw:nth-child(5){animation-delay:1.6s}
+@keyframes paw-appear{
+  0%,15%{opacity:0}
+  30%,70%{opacity:0.45}
+  85%,100%{opacity:0}
+}
+.scan-status-msg{
+  font-size:0.82rem;color:var(--muted);font-style:italic;
 }
 /* ── HOW IT WORKS ────────────────────────────────────── */
 .how-it-works{
@@ -782,8 +809,15 @@ input,textarea,select{color-scheme:light}
         <button class="btn btn-outline" onclick="showAlreadyPaid()">💸 Already Paid?</button>
       </div>
       <div class="scan-status" id="scan-status">
-        <div class="scan-status-dot"></div>
-        <span id="scan-status-msg">Reading listing...</span>
+        <div class="dog-track"><div class="dog-walker">🐕</div></div>
+        <div class="dog-paws">
+          <span class="dog-paw">🐾</span>
+          <span class="dog-paw">🐾</span>
+          <span class="dog-paw">🐾</span>
+          <span class="dog-paw">🐾</span>
+          <span class="dog-paw">🐾</span>
+        </div>
+        <span class="scan-status-msg" id="scan-status-msg">Reading listing...</span>
       </div>
     </div>
 
